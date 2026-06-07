@@ -390,9 +390,21 @@ input.ehp:focus{outline:none;border-color:var(--red)}
 .feat-desc strong{color:var(--text)}
 
 /* LOG */
-.log-area{height:100px;overflow-y:auto;background:rgba(0,0,0,.35);border-radius:6px;padding:8px;
+.log-area{height:120px;overflow-y:auto;background:rgba(0,0,0,.35);border-radius:6px;padding:8px;
   font-size:.72rem;color:var(--muted);font-family:'Roboto Mono',monospace}
 .le-t{color:#2a4050} .le-a{color:var(--teal)}
+
+/* SERGIO CONDITIONS */
+.sc-grid{display:flex;flex-wrap:wrap;gap:5px}
+.scc{padding:4px 11px;border-radius:12px;font-size:.68rem;font-weight:700;cursor:pointer;
+  border:1px solid #252f4a;color:#3a4a6a;transition:all .2s;user-select:none;
+  font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.scc.on.buff{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.12);box-shadow:var(--gG)}
+.scc.on.debuff{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.1);box-shadow:var(--gR)}
+.scc.on.neutral{border-color:var(--blue);color:var(--blue);background:rgba(61,139,255,.1)}
+
+/* MANEUVER DC badge */
+.man-dc{font-size:.58rem;font-weight:700;color:rgba(168,85,247,.7);margin-top:3px;font-family:'Roboto Mono',monospace}
 
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2)}
@@ -529,6 +541,27 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
     <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
       <button class="btn bgray" onclick="useHD()">Use 1 HD</button>
       <span style="font-size:.7rem;color:var(--muted)">Roll 1d10+2, then heal</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch">🧍 Sergio's Conditions</div>
+  <div class="cb">
+    <div style="font-size:.67rem;color:var(--muted);margin-bottom:8px">Click to toggle. Buffs <span style="color:var(--green)">green</span> · Debuffs <span style="color:var(--red)">red</span>.</div>
+    <div class="sc-grid">
+      <span class="scc buff"    onclick="togSC(this,'Concentrating')">Concentrating</span>
+      <span class="scc buff"    onclick="togSC(this,'See Invisible')">See Invisible</span>
+      <span class="scc buff"    onclick="togSC(this,'Parried')">Parried</span>
+      <span class="scc buff"    onclick="togSC(this,'Rallied')">Rallied</span>
+      <span class="scc neutral" onclick="togSC(this,'Poison Active')">☠ Poison Active</span>
+      <span class="scc debuff"  onclick="togSC(this,'Prone')">Prone</span>
+      <span class="scc debuff"  onclick="togSC(this,'Poisoned')">Poisoned</span>
+      <span class="scc debuff"  onclick="togSC(this,'Restrained')">Restrained</span>
+      <span class="scc debuff"  onclick="togSC(this,'Blinded')">Blinded</span>
+      <span class="scc debuff"  onclick="togSC(this,'Frightened')">Frightened</span>
+      <span class="scc debuff"  onclick="togSC(this,'Incapacitated')">Incapacitated</span>
+      <span class="scc debuff"  onclick="togSC(this,'Grappled')">Grappled</span>
     </div>
   </div>
 </div>
@@ -733,68 +766,68 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
       <div class="man" onclick="useMan(this,'Disarming Attack (STR DC 17)')">
         <div class="man-stripe ta"></div>
-        <div class="man-body"><div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:.8rem">STR save (standard)</span></div><span class="timing ta-t">Action · on hit</span><div class="man-desc">+1d10 damage. Target makes <strong>STR save DC 17</strong> or drops a held object (lands in its space).</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-body"><div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:.8rem">STR save</span></div><span class="timing ta-t">Action · on hit</span><div class="man-desc">+1d10 damage. Target makes <strong>STR save DC 17</strong> or drops a held object (lands in its space).</div></div>
+        <div class="man-cost">1 SD<div class="man-dc">DC 17</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Disarming Attack (DEX DC 17)')">
         <div class="man-stripe ta"></div>
-        <div class="man-body"><div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:.8rem">DEX save (variant)</span></div><span class="timing ta-t">Action · on hit</span><div class="man-desc">+1d10 damage. Target makes <strong>DEX save DC 17</strong> or drops a held object. Variant — confirm with DM.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-body"><div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:.8rem">DEX save</span></div><span class="timing ta-t">Action · on hit</span><div class="man-desc">+1d10 damage. Target makes <strong>DEX save DC 17</strong> or drops a held object. Variant — confirm with DM.</div></div>
+        <div class="man-cost">1 SD<div class="man-dc">DC 17</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Lunging Attack')">
         <div class="man-stripe ta"></div>
         <div class="man-body"><div class="man-name">Lunging Attack</div><span class="timing ta-t">Action · melee only</span><div class="man-desc">Move ≥5 ft straight before a <strong>melee</strong> hit → add <strong>+1d10 damage</strong>. Cannot be used with ranged attacks.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">+dmg</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Lunging Dash')">
         <div class="man-stripe tb"></div>
         <div class="man-body"><div class="man-name">Lunging Dash</div><span class="timing tb-t">Bonus Action</span><div class="man-desc">Spend 1 SD and take the <strong>Dash action</strong> as your Bonus Action. Close distance without sacrificing your Action.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">BA</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Parry (DEX +5)')">
         <div class="man-stripe tr"></div>
         <div class="man-body"><div class="man-name">Parry <span style="color:var(--muted)">DEX (+5)</span></div><span class="timing tr-t">Reaction · when damaged by melee</span><div class="man-desc">When a creature <strong>damages you with a melee attack</strong>, reduce the damage by <strong>1d10+5</strong>. Triggers on damage, not just hit — you see the roll first.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">−dmg</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Parry (STR +0)')">
         <div class="man-stripe tr"></div>
         <div class="man-body"><div class="man-name">Parry <span style="color:var(--muted)">STR (+0)</span></div><span class="timing tr-t">Reaction · when damaged by melee</span><div class="man-desc">Reduce melee damage by <strong>1d10+0</strong>. Use DEX version instead — you have +5 DEX vs +0 STR.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">−dmg</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Rally')">
         <div class="man-stripe tb"></div>
         <div class="man-body"><div class="man-name">Rally</div><span class="timing tb-t">Bonus Action</span><div class="man-desc">Ally within 30 ft who can see/hear you gains <strong>1d10+5 Temp HP</strong>. Great when an ally is close to dropping.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">BA</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Tactical Assessment')">
         <div class="man-stripe ts"></div>
         <div class="man-body"><div class="man-name">Tactical Assessment</div><span class="timing ts-t">Special (INT/WIS check)</span><div class="man-desc">On a History, Investigation, or Insight check, add <strong>+1d10</strong> to the roll.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">+roll</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Tac. Master: Push')">
         <div class="man-stripe ta"></div>
         <div class="man-body"><div class="man-name">Tactical Master: Push</div><span class="timing ta-t">Action · replace mastery</span><div class="man-desc">Replace weapon mastery property with <strong>Push</strong> (knock target 10 ft) on this attack. Spend 1 SD.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">10 ft</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Tac. Master: Sap')">
         <div class="man-stripe ta"></div>
         <div class="man-body"><div class="man-name">Tactical Master: Sap</div><span class="timing ta-t">Action · replace mastery</span><div class="man-desc">Target has <strong>Disadvantage on its next attack roll</strong> before start of your next turn. Spend 1 SD.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">Disadv</div></div>
       </div>
 
       <div class="man" onclick="useMan(this,'Tac. Master: Slow')">
         <div class="man-stripe ta"></div>
         <div class="man-body"><div class="man-name">Tactical Master: Slow</div><span class="timing ta-t">Action · replace mastery</span><div class="man-desc">Target's speed <strong>reduced by 10 ft</strong> until start of your next turn. Spend 1 SD.</div></div>
-        <div class="man-cost">1 SD</div>
+        <div class="man-cost">1 SD<div class="man-dc">−10 ft</div></div>
       </div>
 
     </div>
@@ -807,8 +840,9 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
   <div class="cb">
     <div class="log-area" id="logArea"></div>
     <div style="display:flex;gap:6px;margin-top:6px">
-      <input type="text" id="logNote" placeholder="Add note…" style="flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:5px 8px;font-size:.75rem;font-family:'Inter',sans-serif">
+      <input type="text" id="logNote" placeholder="Add note…" style="flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:5px 8px;font-size:.75rem;font-family:'Inter',sans-serif" onkeydown="if(event.key==='Enter')addNote()">
       <button class="btn bgray" onclick="addNote()">Add</button>
+      <button class="btn bgray" onclick="copyLog()" title="Copy log to clipboard">Copy</button>
       <button class="btn bgray" onclick="clearLog()">Clear</button>
     </div>
   </div>
@@ -1022,7 +1056,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.4.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.5.0</span></footer>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -1266,7 +1300,14 @@ function runAdvisor(){
     d.innerHTML=`<div class="advc-icon">${a.i}</div><div><div class="advc-label">${a.l}</div><div class="advc-text">${a.t}</div></div>`;body.appendChild(d);});
 }
 
-// STATUS CHIPS
+// SERGIO SELF-CONDITIONS
+function togSC(el,name){
+  el.classList.toggle('on');
+  addLog(el.classList.contains('on')?`Sergio: ${name} applied`:`Sergio: ${name} cleared`);
+  runAdvisor();
+}
+
+// STATUS CHIPS (header bar — kept for back-compat)
 function tc(el){const t=el.dataset.type;if(el.classList.contains(t)){el.className='chip';el.dataset.type=t;}else{el.className='chip '+t;el.dataset.type=t;}runAdvisor();}
 
 // TABS
@@ -1299,6 +1340,12 @@ function addLog(msg){const t=new Date();const ts=`${t.getHours()}:${String(t.get
 function renderLog(){const a=document.getElementById('logArea');a.innerHTML=logE.map(e=>`<div><span class="le-t">[${e.ts}]</span> <span class="le-a">${e.msg}</span></div>`).join('');a.scrollTop=a.scrollHeight;}
 function addNote(){const i=document.getElementById('logNote');if(i.value.trim()){addLog('📝 '+i.value.trim());i.value='';}}
 function clearLog(){logE=[];renderLog();}
+function copyLog(){
+  const text=logE.map(e=>`[${e.ts}] ${e.msg}`).join('\n');
+  navigator.clipboard.writeText(text).then(()=>toast('Log copied to clipboard!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Log copied!');
+  });
+}
 
 // TOAST
 function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.style.opacity='0',2600);setTimeout(()=>d.remove(),3100);}
