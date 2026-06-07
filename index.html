@@ -47,7 +47,62 @@ header{background:linear-gradient(135deg,#080b16,#111827);border-bottom:1px soli
 /* LAYOUT */
 .layout{display:grid;grid-template-columns:270px 1fr 290px;gap:14px;padding:14px 18px;max-width:1580px;margin:0 auto}
 @media(max-width:1200px){.layout{grid-template-columns:250px 1fr}.rpanel{display:none}}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.rpanel{display:none}}
+@media(max-width:760px){.layout{grid-template-columns:1fr;padding:8px 10px 80px}
+  .lpanel,.cpanel,.rpanel{display:none}.lpanel.mob-active,.cpanel.mob-active,.rpanel.mob-active{display:block}
+  header{padding:10px 12px}.char-title h1{font-size:1.1rem;letter-spacing:1px}
+  .hpills{display:none}}
+
+/* MOBILE NAV */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;
+  background:linear-gradient(180deg,rgba(9,12,24,.97),#090c18);
+  border-top:1px solid rgba(212,160,23,.25);padding:6px 0 env(safe-area-inset-bottom,6px);
+  box-shadow:0 -4px 20px rgba(0,0,0,.6)}
+@media(max-width:760px){.mob-nav{display:flex}}
+.mob-nav-inner{display:flex;width:100%;justify-content:space-around}
+.mnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;
+  cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .2s;
+  font-family:'Rajdhani',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.mnb .mnb-icon{font-size:1.3rem;line-height:1}
+.mnb.active{color:var(--gold2)}
+.mnb.active .mnb-icon{filter:drop-shadow(0 0 6px rgba(212,160,23,.6))}
+.mnb-pip{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:1px;opacity:0}
+.mnb.active .mnb-pip{opacity:1}
+
+/* INITIATIVE TRACKER */
+.init-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.init-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;
+  border:1px solid var(--border);background:rgba(255,255,255,.02);transition:all .2s;position:relative;cursor:grab}
+.init-row:active{cursor:grabbing}
+.init-row.active-turn{border-color:var(--gold);background:rgba(212,160,23,.08);box-shadow:0 0 12px rgba(212,160,23,.15)}
+.init-row.active-turn::before{content:'▶';position:absolute;left:-14px;color:var(--gold);font-size:.7rem}
+.init-row.is-sergio{border-color:rgba(212,160,23,.3)}
+.init-row.is-ally{border-color:rgba(61,139,255,.25)}
+.init-row.is-enemy{border-color:rgba(239,68,68,.25)}
+.init-row.is-dead{opacity:.3;text-decoration:line-through}
+.init-num{font-family:'Roboto Mono',monospace;font-size:1rem;font-weight:900;min-width:28px;text-align:right;color:var(--gold2)}
+.init-name{flex:1;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem}
+.init-row.active-turn .init-name{color:var(--gold2)}
+.init-hp-bar{height:4px;border-radius:2px;margin-top:2px}
+.init-type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-sergio{background:var(--gold)} .dot-ally{background:var(--blue)} .dot-enemy{background:var(--red)} .dot-neutral{background:var(--muted)}
+.init-actions{display:flex;gap:3px}
+.init-act-btn{width:22px;height:22px;border-radius:4px;border:1px solid var(--border2);background:rgba(255,255,255,.04);
+  color:var(--muted);cursor:pointer;font-size:.75rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.init-act-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.init-act-btn.kill{border-color:rgba(239,68,68,.3);color:rgba(239,68,68,.5)}
+.init-act-btn.kill:hover{background:rgba(239,68,68,.15);color:var(--red)}
+.init-add-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+input.init-name-in{flex:1;min-width:80px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);padding:5px 8px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem}
+input.init-name-in:focus{outline:none;border-color:var(--gold)}
+input.init-num-in{width:52px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
+  color:var(--gold2);padding:5px 6px;text-align:center;font-family:'Roboto Mono',monospace;font-weight:700}
+input.init-num-in:focus{outline:none;border-color:var(--gold)}
+.init-type-sel{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);padding:5px 6px;font-family:'Rajdhani',sans-serif;font-size:.8rem;cursor:pointer}
+.init-type-sel:focus{outline:none}
+.init-round-badge{font-family:'Roboto Mono',monospace;font-size:.72rem;color:var(--muted)}
+.turn-arrow{font-size:.8rem;color:var(--gold);margin-left:auto}
 
 /* CARD */
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;
@@ -405,7 +460,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 <div class="layout">
 
 <!-- ═══ LEFT ═══ -->
-<div>
+<div class="lpanel mob-active" id="mob-stats">
 
 <div class="card">
   <div class="ch">❤ Hit Points</div>
@@ -528,7 +583,37 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 </div><!-- end left -->
 
 <!-- ═══ CENTER ═══ -->
-<div>
+<div class="cpanel" id="mob-combat">
+
+<!-- INITIATIVE TRACKER -->
+<div class="card">
+  <div class="ch" style="justify-content:space-between">
+    <span>🎲 Initiative Order</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="init-round-badge">Round <span id="initRound">1</span></span>
+      <button class="btn bgray" style="font-size:.68rem;padding:3px 10px" onclick="nextCombatant()">Next ▶</button>
+      <button class="btn bgray" style="font-size:.68rem;padding:3px 10px" onclick="clearInitiative()">Clear</button>
+    </div>
+  </div>
+  <div class="cb">
+    <div class="init-list" id="initList"></div>
+    <div class="init-add-row">
+      <input class="init-name-in" id="newInitName" placeholder="Name…" onkeydown="if(event.key==='Enter')addCombatant()">
+      <input class="init-num-in" id="newInitNum" type="number" placeholder="Init" onkeydown="if(event.key==='Enter')addCombatant()">
+      <select class="init-type-sel" id="newInitType">
+        <option value="sergio">⚔ Sergio</option>
+        <option value="ally">🔵 Ally</option>
+        <option value="enemy" selected>🔴 Enemy</option>
+        <option value="neutral">⚪ Other</option>
+      </select>
+      <button class="btn bblue" style="font-size:.72rem" onclick="addCombatant()">+ Add</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:6px">
+      <button class="btn bgray" style="font-size:.68rem" onclick="addSergio()">+ Sergio (auto)</button>
+      <button class="btn bgray" style="font-size:.68rem" onclick="sortInitiative()">Sort ↓</button>
+    </div>
+  </div>
+</div>
 
 <!-- ADVISOR -->
 <div class="advisor">
@@ -732,7 +817,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 </div><!-- end center -->
 
 <!-- ═══ RIGHT ═══ -->
-<div class="rpanel">
+<div class="rpanel" id="mob-enemies">
 
 <!-- PRE-COMBAT MODAL -->
 <div class="modal-overlay hidden" id="preCombatModal">
@@ -937,7 +1022,25 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.3.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.4.0</span></footer>
+
+<!-- MOBILE NAV -->
+<nav class="mob-nav">
+  <div class="mob-nav-inner">
+    <button class="mnb active" id="mnb-stats" onclick="mobNav('stats')">
+      <span class="mnb-icon">📊</span>Stats<div class="mnb-pip"></div>
+    </button>
+    <button class="mnb" id="mnb-combat" onclick="mobNav('combat')">
+      <span class="mnb-icon">⚔️</span>Combat<div class="mnb-pip"></div>
+    </button>
+    <button class="mnb" id="mnb-enemies" onclick="mobNav('enemies')">
+      <span class="mnb-icon">👁</span>Enemies<div class="mnb-pip"></div>
+    </button>
+    <button class="mnb" id="mnb-ref" onclick="mobNav('ref')">
+      <span class="mnb-icon">📖</span>Reference<div class="mnb-pip"></div>
+    </button>
+  </div>
+</nav>
 
 <script>
 const S={hp:98,maxHp:98,sd:5,sw:4,as:1,ind:1,kye:1,hd:11,poisonActive:false,round:1,turn:1};
@@ -1210,9 +1313,142 @@ function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)retur
   if(S.as===0){document.getElementById('surgeLabel').textContent='Spent';document.getElementById('sl-surge').classList.add('spent');}
 }catch(e){}}
 
+// ═══ INITIATIVE TRACKER ═══
+let initCombatants=[];  // [{name, init, type, hp, dead}]
+let initCurrent=-1;
+let initRoundNum=1;
+
+function addCombatant(){
+  const name=document.getElementById('newInitName').value.trim();
+  const num=parseInt(document.getElementById('newInitNum').value)||0;
+  const type=document.getElementById('newInitType').value;
+  if(!name)return;
+  initCombatants.push({name,init:num,type,dead:false});
+  sortInitiative();
+  document.getElementById('newInitName').value='';
+  document.getElementById('newInitNum').value='';
+  document.getElementById('newInitName').focus();
+  if(initCurrent<0&&initCombatants.length>0)initCurrent=0;
+  renderInitiative();
+}
+
+function addSergio(){
+  // Check if already added
+  if(initCombatants.find(c=>c.type==='sergio'))return;
+  initCombatants.push({name:'Sergio',init:0,type:'sergio',dead:false});
+  sortInitiative();
+  if(initCurrent<0)initCurrent=0;
+  renderInitiative();
+  toast('Add your initiative roll to Sergio\'s slot — click the number to edit.');
+}
+
+function sortInitiative(){
+  initCombatants.sort((a,b)=>b.init-a.init);
+  renderInitiative();
+}
+
+function nextCombatant(){
+  if(initCombatants.length===0)return;
+  const alive=initCombatants.filter(c=>!c.dead);
+  if(alive.length===0)return;
+  // find next alive from current
+  let next=initCurrent;
+  let wrapped=false;
+  do{
+    next=(next+1)%initCombatants.length;
+    if(next===0&&!wrapped){wrapped=true;initRoundNum++;document.getElementById('initRound').textContent=initRoundNum;addLog(`══ Round ${initRoundNum} (Initiative) ══`);}
+  }while(initCombatants[next].dead);
+  initCurrent=next;
+  const cur=initCombatants[initCurrent];
+  addLog(`Initiative: ${cur.name}'s turn`);
+  // if it's Sergio's turn, fire newTurn automatically
+  if(cur.type==='sergio'){newTurn();}
+  renderInitiative();
+}
+
+function killCombatant(idx){
+  initCombatants[idx].dead=!initCombatants[idx].dead;
+  if(initCombatants[idx].dead)addLog(`${initCombatants[idx].name} is down`);
+  renderInitiative();
+}
+
+function removeCombatant(idx){
+  initCombatants.splice(idx,1);
+  if(initCurrent>=initCombatants.length)initCurrent=initCombatants.length-1;
+  renderInitiative();
+}
+
+function editInitNum(idx){
+  const val=prompt(`Initiative for ${initCombatants[idx].name}:`,initCombatants[idx].init);
+  if(val===null)return;
+  const n=parseInt(val);
+  if(!isNaN(n)){initCombatants[idx].init=n;sortInitiative();}
+}
+
+function clearInitiative(){
+  initCombatants=[];initCurrent=-1;initRoundNum=1;
+  document.getElementById('initRound').textContent='1';
+  renderInitiative();
+}
+
+function renderInitiative(){
+  const list=document.getElementById('initList');
+  if(!list)return;
+  if(initCombatants.length===0){
+    list.innerHTML=`<div style="font-size:.76rem;color:var(--muted);text-align:center;padding:10px;font-style:italic">Add combatants to track initiative order.</div>`;
+    return;
+  }
+  list.innerHTML='';
+  initCombatants.forEach((c,i)=>{
+    const isActive=i===initCurrent;
+    const typeColors={sergio:'var(--gold)',ally:'var(--blue)',enemy:'var(--red)',neutral:'var(--muted)'};
+    const dotClass={sergio:'dot-sergio',ally:'dot-ally',enemy:'dot-enemy',neutral:'dot-neutral'}[c.type];
+    const typeClass={sergio:'is-sergio',ally:'is-ally',enemy:'is-enemy',neutral:''}[c.type];
+    const row=document.createElement('div');
+    row.className=`init-row ${typeClass}${isActive?' active-turn':''}${c.dead?' is-dead':''}`;
+    row.innerHTML=`
+      <div class="init-type-dot ${dotClass}"></div>
+      <div class="init-num" onclick="editInitNum(${i})" title="Click to edit" style="cursor:pointer">${c.init}</div>
+      <div style="flex:1">
+        <div class="init-name">${c.name}${isActive?` <span style="font-size:.6rem;color:var(--gold);font-family:'Rajdhani',sans-serif;letter-spacing:1px">ACTIVE</span>`:''}</div>
+      </div>
+      <div class="init-actions">
+        <button class="init-act-btn kill" onclick="killCombatant(${i})" title="${c.dead?'Revive':'Mark Dead'}">${c.dead?'↑':'✕'}</button>
+        <button class="init-act-btn" onclick="removeCombatant(${i})" title="Remove">🗑</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+// ═══ MOBILE NAV ═══
+const MOB_PANELS={
+  stats:  {panel:'mob-stats',  btn:'mnb-stats'},
+  combat: {panel:'mob-combat', btn:'mnb-combat'},
+  enemies:{panel:'mob-enemies',btn:'mnb-enemies'},
+  ref:    {panel:'mob-enemies',btn:'mnb-ref'},  // ref reuses right panel on mobile
+};
+let mobActive='stats';
+
+function mobNav(tab){
+  // hide all panels on mobile
+  ['lpanel','cpanel','rpanel'].forEach(cls=>{
+    document.querySelectorAll('.'+cls).forEach(el=>el.classList.remove('mob-active'));
+  });
+  // deactivate all nav buttons
+  document.querySelectorAll('.mnb').forEach(b=>b.classList.remove('active'));
+  // activate selected
+  const map={stats:'lpanel',combat:'cpanel',enemies:'rpanel',ref:'rpanel'};
+  const panelClass=map[tab];
+  document.querySelectorAll('.'+panelClass).forEach(el=>el.classList.add('mob-active'));
+  const btn=document.getElementById('mnb-'+tab);if(btn)btn.classList.add('active');
+  // on mobile, scroll to top
+  window.scrollTo({top:0,behavior:'smooth'});
+  mobActive=tab;
+}
+
 setInterval(saveState,5000);
 document.getElementById('curHP').addEventListener('input',updateHP);
-loadState();init();
+loadState();init();renderInitiative();
 </script>
 </body>
 </html>
