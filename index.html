@@ -472,15 +472,24 @@ input.npc-notes:focus{outline:none;border-color:var(--gold);color:var(--text)}
 .dbtn:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,160,23,.08);transform:translateY(-2px)}
 .dbtn.d20-btn{border-color:rgba(61,139,255,.35);color:var(--blue)}
 .dbtn.d20-btn:hover{border-color:var(--blue);background:rgba(61,139,255,.1);color:var(--blue)}
-.dice-result-area{text-align:center;padding:14px 0 10px}
-.dice-big{font-size:3.6rem;font-weight:900;color:var(--gold2);font-family:'Roboto Mono',monospace;line-height:1;
-  transition:color .3s;min-height:58px;display:flex;align-items:center;justify-content:center}
-.dice-big.nat20{color:var(--green)!important;text-shadow:0 0 24px rgba(16,185,129,.6)}
-.dice-big.nat1{color:var(--red)!important;text-shadow:0 0 24px rgba(239,68,68,.5)}
-@keyframes dPop{0%{transform:scale(.7);opacity:.4}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
-.dice-big.popped{animation:dPop .28s ease-out}
-.dice-formula-lbl{font-size:.7rem;color:var(--muted);font-family:'Roboto Mono',monospace;margin-top:2px}
-.dice-breakdown-lbl{font-size:.68rem;color:#4b5680;font-family:'Roboto Mono',monospace;margin-top:2px}
+/* GRAPHICAL DICE */
+.die-display-area{text-align:center;padding:10px 0 8px;min-height:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+#dieSVG{width:112px;height:112px;overflow:visible;transition:filter .35s}
+#dieSVG.nat20{filter:drop-shadow(0 0 12px rgba(16,185,129,.9)) drop-shadow(0 0 24px rgba(16,185,129,.5))}
+#dieSVG.nat1{filter:drop-shadow(0 0 12px rgba(239,68,68,.9)) drop-shadow(0 0 24px rgba(239,68,68,.5))}
+@keyframes dieRoll{
+  0%{transform:rotate(0deg) scale(.75);opacity:.5}
+  15%{transform:rotate(80deg) scale(1.12)}
+  35%{transform:rotate(165deg) scale(.9)}
+  55%{transform:rotate(250deg) scale(1.07)}
+  75%{transform:rotate(320deg) scale(.95)}
+  100%{transform:rotate(360deg) scale(1);opacity:1}
+}
+@keyframes diePop{0%{transform:scale(.65);opacity:.3}55%{transform:scale(1.13)}100%{transform:scale(1);opacity:1}}
+.die-rolling{animation:dieRoll .38s linear infinite}
+.die-popped{animation:diePop .3s cubic-bezier(.22,1,.36,1)}
+.die-formula-lbl{font-size:.7rem;color:var(--muted);font-family:'Roboto Mono',monospace}
+.die-breakdown-lbl{font-size:.66rem;color:#3a4870;font-family:'Roboto Mono',monospace}
 .dice-custom-row{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:11px}
 .dice-custom-row input[type=number]{width:52px;background:rgba(255,255,255,.04);border:1px solid var(--border2);
   border-radius:6px;color:var(--text);padding:5px 6px;text-align:center;font-family:'Roboto Mono',monospace;font-size:.9rem}
@@ -1049,10 +1058,13 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
       <button class="btn bblue" style="font-size:.78rem;padding:5px 14px" onclick="customRoll()">Roll</button>
     </div>
     <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-      <div class="dice-result-area">
-        <div class="dice-big" id="diceBig">—</div>
-        <div class="dice-formula-lbl" id="diceFormula"></div>
-        <div class="dice-breakdown-lbl" id="diceBreakdown"></div>
+      <div class="die-display-area">
+        <svg id="dieSVG" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="60,4 112,34 112,88 60,118 8,88 8,34" fill="rgba(61,139,255,.12)" stroke="#3d8bff" stroke-width="3" stroke-linejoin="round"/>
+          <text x="60" y="64" fill="#3d8bff" font-family="'Roboto Mono',monospace" font-weight="900" font-size="38" text-anchor="middle" dominant-baseline="central">—</text>
+        </svg>
+        <div class="die-formula-lbl" id="diceFormula"></div>
+        <div class="die-breakdown-lbl" id="diceBreakdown"></div>
       </div>
     </div>
     <div class="dice-presets">
@@ -1261,7 +1273,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v2.0.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v2.1.0</span></footer>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -1869,38 +1881,78 @@ function presetRoll(label,n,s,m){
   document.getElementById('dMod').value=m;
   rollDice(n,s,m,label);
 }
+// ─── GRAPHICAL DICE ───
+const DIE_CFG={
+  4: {shape:'polygon',points:'60,8 112,100 8,100',color:'#06b6d4',textY:72},
+  6: {shape:'rect',x:16,y:16,w:88,h:88,rx:10,color:'#10b981',textY:64},
+  8: {shape:'polygon',points:'60,6 114,60 60,114 6,60',color:'#a855f7',textY:64},
+  10:{shape:'polygon',points:'60,6 110,58 60,116 10,58',color:'#a855f7',textY:68},
+  12:{shape:'polygon',points:'60,4 114,42 94,108 26,108 6,42',color:'#f59e0b',textY:68},
+  20:{shape:'polygon',points:'60,4 112,34 112,88 60,118 8,88 8,34',color:'#3d8bff',textY:64},
+  100:{shape:'circle',cx:60,cy:60,r:54,color:'#d4a017',textY:64},
+};
+const D6_PIPS={
+  1:[[60,60]],
+  2:[[38,38],[82,82]],
+  3:[[38,38],[60,60],[82,82]],
+  4:[[38,38],[82,38],[38,82],[82,82]],
+  5:[[38,38],[82,38],[60,60],[38,82],[82,82]],
+  6:[[38,35],[82,35],[38,60],[82,60],[38,85],[82,85]],
+};
+function buildDieFace(sides,value,glow){
+  const c=DIE_CFG[sides]||DIE_CFG[20];
+  const col=glow==='nat20'?'#10b981':glow==='nat1'?'#ef4444':c.color;
+  let shape='';
+  if(c.shape==='polygon')shape=`<polygon points="${c.points}" fill="${col}1a" stroke="${col}" stroke-width="3.5" stroke-linejoin="round"/>`;
+  else if(c.shape==='rect')shape=`<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="${c.rx}" fill="${col}1a" stroke="${col}" stroke-width="3.5"/>`;
+  else shape=`<circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" fill="${col}1a" stroke="${col}" stroke-width="3.5"/>`;
+  let content='';
+  if(sides===6&&value>=1&&value<=6){
+    content=(D6_PIPS[value]||[]).map(([px,py])=>`<circle cx="${px}" cy="${py}" r="7" fill="${col}"/>`).join('');
+  } else {
+    const fs=value>99?'22':value>9?'30':'38';
+    content=`<text x="60" y="${c.textY}" fill="${col}" font-family="'Roboto Mono',monospace" font-weight="900" font-size="${fs}" text-anchor="middle" dominant-baseline="central">${value??'?'}</text>`;
+  }
+  return shape+content;
+}
 function rollDice(n,sides,mod,label){
   const results=Array.from({length:n},()=>Math.floor(Math.random()*sides)+1);
   const subtotal=results.reduce((a,b)=>a+b,0);
   const total=subtotal+mod;
-  const bigEl=document.getElementById('diceBig');
+  const svg=document.getElementById('dieSVG');
   const formulaEl=document.getElementById('diceFormula');
   const breakEl=document.getElementById('diceBreakdown');
-  // animate
-  bigEl.className='dice-big';bigEl.textContent='…';
+  // start rolling
+  svg.className='die-rolling';
+  svg.innerHTML=buildDieFace(sides,Math.floor(Math.random()*sides)+1,'');
+  formulaEl.textContent=''; breakEl.textContent='';
   let ticks=0;
   const iv=setInterval(()=>{
-    bigEl.textContent=Math.floor(Math.random()*sides)+1+(ticks>4?mod:0);
+    const randVal=Math.floor(Math.random()*sides)+1;
+    svg.innerHTML=buildDieFace(sides,randVal,'');
     if(++ticks>=10){
       clearInterval(iv);
-      bigEl.textContent=total;
-      bigEl.classList.add('popped');
-      if(n===1&&sides===20&&total-mod===20)bigEl.classList.add('nat20');
-      else if(n===1&&sides===20&&total-mod===1)bigEl.classList.add('nat1');
-      setTimeout(()=>bigEl.classList.remove('popped'),400);
+      const isNat20=n===1&&sides===20&&results[0]===20;
+      const isNat1=n===1&&sides===20&&results[0]===1;
+      const glow=isNat20?'nat20':isNat1?'nat1':'';
+      // show single-die value for 1-die rolls, total for multi-die
+      const displayVal=n===1?results[0]:total;
+      svg.className='die-popped'+(glow?' '+glow:'');
+      svg.innerHTML=buildDieFace(sides,displayVal,glow);
+      setTimeout(()=>{
+        if(svg.className.includes('die-popped'))svg.classList.remove('die-popped');
+      },400);
       const formula=`${label}${n>1||label.includes('d')?'':` (${n}d${sides}${mod?'+'+ mod:''})`}`;
-      formulaEl.textContent=formula;
+      formulaEl.textContent=formula+(mod&&n===1?`  →  ${total}`:'');
       const breakdown=results.length>1?`[${results.join(' + ')}]${mod?` + ${mod}`:''} = ${total}`
         :mod?`${results[0]} ${mod>=0?'+':''} ${mod} = ${total}`:'';
       breakEl.textContent=breakdown;
-      // log to history
       const ts=new Date();const tsStr=`${ts.getHours()}:${String(ts.getMinutes()).padStart(2,'0')}`;
       diceHistory.unshift({ts:tsStr,label:label||`${n}d${sides}`,total,nat:n===1&&sides===20?results[0]:null,mod,breakdown});
       if(diceHistory.length>12)diceHistory.pop();
       renderDiceHist();
-      // also log nat20/nat1 to encounter log
-      if(n===1&&sides===20&&results[0]===20)addLog(`🎯 NATURAL 20! ${label||`d20`} → ${total}`);
-      else if(n===1&&sides===20&&results[0]===1)addLog(`💀 Natural 1. ${label||`d20`} → ${total}`);
+      if(isNat20)addLog(`🎯 NATURAL 20! ${label||`d20`} → ${total}`);
+      else if(isNat1)addLog(`💀 Natural 1. ${label||`d20`} → ${total}`);
     }
   },55);
 }
