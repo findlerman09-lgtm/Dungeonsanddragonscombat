@@ -444,6 +444,26 @@ input.npc-notes{flex:2;background:rgba(255,255,255,.04);border:1px solid var(--b
   color:var(--muted);padding:4px 7px;font-size:.72rem;font-family:'Inter',sans-serif}
 input.npc-notes:focus{outline:none;border-color:var(--gold);color:var(--text)}
 
+/* MANEUVER DC + USE COUNT */
+.man-dc{font-size:.58rem;font-weight:700;color:rgba(168,85,247,.7);margin-top:2px;font-family:'Roboto Mono',monospace}
+.man-use-count{font-size:.62rem;font-weight:900;color:var(--gold2);font-family:'Roboto Mono',monospace;min-height:12px}
+
+/* DEBRIEF */
+.debrief-section{margin-bottom:14px}
+.debrief-lbl{font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;font-family:'Rajdhani',sans-serif}
+.debrief-row{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.debrief-row:last-child{border-bottom:none}
+.debrief-val{font-family:'Roboto Mono',monospace;font-weight:700;color:var(--gold2)}
+.debrief-insight{border-left:3px solid var(--purple);background:rgba(168,85,247,.06);
+  border-radius:0 7px 7px 0;padding:8px 12px;font-size:.78rem;color:#8899bb;line-height:1.55;margin-top:10px}
+.debrief-insight strong{color:var(--text)}
+
+/* INIT HP BAR */
+.init-hp-bar{height:3px;border-radius:2px;margin-top:3px;background:rgba(255,255,255,.08);overflow:hidden;cursor:pointer}
+.init-hp-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
+
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2)}
 .tab{padding:8px 14px;cursor:pointer;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;font-family:'Rajdhani',sans-serif}
@@ -767,6 +787,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
     <div class="init-add-row">
       <input class="init-name-in" id="newInitName" placeholder="Name…" onkeydown="if(event.key==='Enter')addCombatant()">
       <input class="init-num-in" id="newInitNum" type="number" placeholder="Init" onkeydown="if(event.key==='Enter')addCombatant()">
+      <input class="init-num-in" id="newInitHP" type="number" placeholder="HP" style="width:48px" onkeydown="if(event.key==='Enter')addCombatant()">
       <select class="init-type-sel" id="newInitType">
         <option value="sergio">⚔ Sergio</option>
         <option value="ally">🔵 Ally</option>
@@ -1158,7 +1179,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.8.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.9.0</span></footer>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -1181,8 +1202,11 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 <script>
 const S={hp:98,maxHp:98,sd:5,sw:4,as:1,ind:1,kye:1,hd:11,poisonActive:false,round:1,turn:1};
 let logE=[];
+let encDmgTaken=0;
+let manStats={};       // {name: sessionCount} — resets each encounter
+let allTimeMan={};     // {name: allTimeCount} — persisted
 
-function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();renderEnemies();renderVexViz();renderNPCs();runAdvisor();}
+function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();renderEnemies();renderVexViz();renderNPCs();initManCounts();runAdvisor();}
 // close modal on overlay click
 document.addEventListener('click',e=>{const m=document.getElementById('preCombatModal');if(m&&e.target===m)closePreCombat();});
 
@@ -1227,6 +1251,7 @@ function updateHP(){
 function adjHP(dir){const a=parseInt(document.getElementById('adjV').value)||0;if(!a)return;
   S.hp=Math.max(0,Math.min(S.maxHp,S.hp+dir*a));document.getElementById('curHP').value=S.hp;
   addLog(`HP ${dir>0?'+':'-'}${a} → ${S.hp}`);document.getElementById('adjV').value='';
+  if(dir<0)encDmgTaken+=a;
   if(dir<0){
     const isConc=[...document.querySelectorAll('.scc.on')].some(el=>el.textContent.includes('Concentrating'));
     if(isConc){const dc=Math.max(10,Math.floor(a/2));addLog(`⚠ Concentration check: CON save DC ${dc}`);showConcAlert(dc,a);}
@@ -1433,24 +1458,101 @@ function shortRest(){S.sd=5;S.as=1;renderSD();renderPips('asP',1,1);
   document.getElementById('surgeLabel').textContent='Available';document.getElementById('sl-surge').classList.remove('spent');
   document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
   addLog('⏱ Short Rest — SD (5), Action Surge restored');runAdvisor();updateCombos();toast('Short Rest: SD & Action Surge restored.');}
-function longRest(){S.sd=5;S.sw=4;S.as=1;S.ind=1;S.kye=1;S.hd=11;S.hp=S.maxHp;
+function longRest(){showDebrief();}
+function executeLongRest(){
+  S.sd=5;S.sw=4;S.as=1;S.ind=1;S.kye=1;S.hd=11;S.hp=S.maxHp;
   renderSD();renderPips('swP',4,4);renderPips('asP',1,1);renderPips('inP',1,1);renderPips('kyP',1,1);renderHD();
   document.getElementById('curHP').value=S.maxHp;document.getElementById('surgeLabel').textContent='Available';
   document.getElementById('sl-surge').classList.remove('spent');
   document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
-  document.querySelectorAll('.chip').forEach(c=>c.className='chip');updateHP();
-  addLog('🌙 Long Rest — All resources restored');S.round=1;S.turn=1;runAdvisor();updateCombos();toast('Long Rest: Fully restored!');}
+  document.querySelectorAll('.chip').forEach(c=>c.className='chip');
+  document.querySelectorAll('.scc.on').forEach(c=>c.classList.remove('on'));
+  updateHP();addLog('🌙 Long Rest — All resources restored');
+  manStats={};encDmgTaken=0;dmgDealt=0;updateDmgDealt();initManCounts();
+  S.round=1;S.turn=1;runAdvisor();updateCombos();toast('Long Rest: Fully restored!');
+  document.getElementById('debriefModal')?.remove();
+}
+function showDebrief(){
+  document.getElementById('debriefModal')?.remove();
+  // gather data
+  const rounds=Math.max(1,(initRoundNum>1?initRoundNum:S.round));
+  const sdSpent=5-S.sd;const swSpent=4-S.sw;const asSpent=1-S.as;
+  const usedMans=Object.entries(manStats).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const allManNames=['Ambush','Commanding Presence','Disarming Attack (STR DC 17)','Lunging Attack','Lunging Dash','Parry (DEX +5)','Rally','Tactical Assessment','Tac. Master: Sap','Tac. Master: Slow','Tac. Master: Push'];
+  const neverUsed=allManNames.filter(n=>!manStats[n]);
+  // build insights
+  const insights=[];
+  if(neverUsed.length>0)insights.push(`<strong>Never used this encounter:</strong> ${neverUsed.slice(0,3).join(', ')}${neverUsed.length>3?'…':''}`);
+  if(sdSpent===0)insights.push('<strong>No SD spent</strong> — maneuvers sat idle all encounter.');
+  if(sdSpent===5)insights.push('<strong>All 5 SD used</strong> — high maneuver pressure. Short rest before next fight if possible.');
+  if(!manStats['Parry (DEX +5)']&&encDmgTaken>30)insights.push('<strong>Took '+encDmgTaken+' dmg</strong> without using Parry — worth keeping that reaction ready.');
+  if(asSpent===0&&rounds>=3)insights.push('<strong>Action Surge never used</strong> across '+rounds+' rounds — consider opening with it sooner.');
+  const overlay=document.createElement('div');overlay.className='modal-overlay';overlay.id='debriefModal';
+  overlay.innerHTML=`<div class="modal" style="max-width:480px">
+    <div class="modal-head"><h2>📊 Encounter Debrief</h2><button class="modal-close" onclick="document.getElementById('debriefModal').remove()">✕</button></div>
+    <div class="modal-body">
+      <div class="debrief-section">
+        <div class="debrief-lbl">Combat Summary</div>
+        <div class="debrief-row"><span>Rounds survived</span><span class="debrief-val">${rounds}</span></div>
+        <div class="debrief-row"><span>Damage dealt</span><span class="debrief-val" style="color:var(--red)">${dmgDealt}</span></div>
+        <div class="debrief-row"><span>Damage taken</span><span class="debrief-val" style="color:var(--amber)">${encDmgTaken}</span></div>
+      </div>
+      <div class="debrief-section">
+        <div class="debrief-lbl">Resources Used</div>
+        <div class="debrief-row"><span>Superiority Dice</span><span class="debrief-val">${sdSpent}/5</span></div>
+        ${swSpent?`<div class="debrief-row"><span>Second Wind</span><span class="debrief-val">${swSpent} used</span></div>`:''}
+        ${asSpent?`<div class="debrief-row"><span>Action Surge</span><span class="debrief-val" style="color:var(--gold)">used</span></div>`:''}
+      </div>
+      ${usedMans.length?`<div class="debrief-section">
+        <div class="debrief-lbl">Maneuvers This Encounter</div>
+        ${usedMans.map(([n,v])=>`<div class="debrief-row"><span>${n}</span><span class="debrief-val">×${v}</span></div>`).join('')}
+      </div>`:''}
+      ${insights.length?`<div class="debrief-insight">${insights.join('<br>')}</div>`:''}
+    </div>
+    <div class="modal-footer">
+      <button class="btn bgray" onclick="document.getElementById('debriefModal').remove()">Cancel</button>
+      <button class="btn blr" onclick="executeLongRest()">🌙 Take Long Rest</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+}
 function useHD(){if(S.hd<=0){toast('No hit dice!');return;}S.hd--;renderHD();
   const roll=Math.ceil(Math.random()*10)+2;S.hp=Math.min(S.maxHp,S.hp+roll);
   document.getElementById('curHP').value=S.hp;updateHP();addLog(`Hit Die → ${roll-2}+2=${roll} HP (now ${S.hp})`);toast(`Hit Die: +${roll} HP.`);}
 
 // MANEUVERS
 function useMan(el,name){const used=el.classList.contains('used');
-  if(used){el.classList.remove('used');const b=el.querySelector('.man-badge');if(b)b.remove();S.sd=Math.min(5,S.sd+1);renderSD();runAdvisor();updateCombos();return;}
+  if(used){el.classList.remove('used');const b=el.querySelector('.man-badge');if(b)b.remove();S.sd=Math.min(5,S.sd+1);
+    manStats[name]=Math.max(0,(manStats[name]||1)-1);allTimeMan[name]=Math.max(0,(allTimeMan[name]||1)-1);
+    updateManCount(name);renderSD();runAdvisor();updateCombos();return;}
   if(S.sd<=0){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);toast('No Superiority Dice!');return;}
   el.classList.add('used');S.sd=Math.max(0,S.sd-1);renderSD();
+  manStats[name]=(manStats[name]||0)+1;allTimeMan[name]=(allTimeMan[name]||0)+1;
+  updateManCount(name);
   const badge=document.createElement('span');badge.className='man-badge';badge.textContent='SD SPENT';el.querySelector('.man-cost').appendChild(badge);
   addLog(`Maneuver: ${name} (SD spent, ${S.sd} left)`);runAdvisor();updateCombos();}
+
+function updateManCount(name){
+  document.querySelectorAll('.man').forEach(m=>{
+    const match=m.getAttribute('onclick')?.match(/useMan\(this,'([^']+)'\)/);
+    if(!match||match[1]!==name)return;
+    let cnt=m.querySelector('.man-use-count');
+    if(!cnt){cnt=document.createElement('div');cnt.className='man-use-count';m.querySelector('.man-cost')?.appendChild(cnt);}
+    const n=manStats[name]||0;cnt.textContent=n>0?`×${n}`:'';
+  });
+}
+function initManCounts(){
+  document.querySelectorAll('.man').forEach(m=>{
+    const match=m.getAttribute('onclick')?.match(/useMan\(this,'([^']+)'\)/);
+    if(!match)return;
+    const name=match[1];
+    const cost=m.querySelector('.man-cost');if(!cost)return;
+    let cnt=cost.querySelector('.man-use-count');
+    if(!cnt){cnt=document.createElement('div');cnt.className='man-use-count';cost.appendChild(cnt);}
+    const n=manStats[name]||0;cnt.textContent=n>0?`×${n}`:'';
+  });
+}
 
 // COMBOS
 function activateCombo(el,name){if(el.classList.contains('unavail')){toast('Not enough resources for this combo.');return;}
@@ -1654,7 +1756,7 @@ function copyLog(){
 function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.style.opacity='0',2600);setTimeout(()=>d.remove(),3100);}
 
 // PERSIST
-function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40),npcs}));}catch(e){}}
+function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40),npcs,allTimeMan}));}catch(e){}}
 function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)return;const d=JSON.parse(raw);
   if(d.hp!==undefined){S.hp=d.hp;document.getElementById('curHP').value=d.hp;}
   ['sd','sw','as','ind','kye','hd','poisonActive','round','turn'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k];});
@@ -1662,6 +1764,7 @@ function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)retur
   if(d.log){logE=d.log;renderLog();}if(S.poisonActive)updatePoisonUI();
   if(S.as===0){document.getElementById('surgeLabel').textContent='Spent';document.getElementById('sl-surge').classList.add('spent');}
   if(d.npcs){npcs=d.npcs;renderNPCs();}
+  if(d.allTimeMan){allTimeMan=d.allTimeMan;}
 }catch(e){}}
 
 // ═══ INITIATIVE TRACKER ═══
@@ -1674,10 +1777,12 @@ function addCombatant(){
   const num=parseInt(document.getElementById('newInitNum').value)||0;
   const type=document.getElementById('newInitType').value;
   if(!name)return;
-  initCombatants.push({name,init:num,type,dead:false});
+  const hp=parseInt(document.getElementById('newInitHP').value)||null;
+  initCombatants.push({name,init:num,type,dead:false,hp,maxHp:hp});
   sortInitiative();
   document.getElementById('newInitName').value='';
   document.getElementById('newInitNum').value='';
+  document.getElementById('newInitHP').value='';
   document.getElementById('newInitName').focus();
   if(initCurrent<0&&initCombatants.length>0)initCurrent=0;
   renderInitiative();
@@ -1731,9 +1836,15 @@ function removeCombatant(idx){
 
 function editInitNum(idx){
   const val=prompt(`Initiative for ${initCombatants[idx].name}:`,initCombatants[idx].init);
+  if(val===null)return;const n=parseInt(val);if(!isNaN(n)){initCombatants[idx].init=n;sortInitiative();}
+}
+function editInitHP(idx){
+  const c=initCombatants[idx];
+  const val=prompt(`HP for ${c.name} (current/max, e.g. "45/80"):`,`${c.hp||0}/${c.maxHp||0}`);
   if(val===null)return;
-  const n=parseInt(val);
-  if(!isNaN(n)){initCombatants[idx].init=n;sortInitiative();}
+  const parts=val.split('/');
+  const cur=parseInt(parts[0]);const max=parseInt(parts[1]||parts[0]);
+  if(!isNaN(cur)){c.hp=cur;if(!isNaN(max))c.maxHp=max||c.maxHp;renderInitiative();}
 }
 
 function clearInitiative(){
@@ -1762,6 +1873,7 @@ function renderInitiative(){
       <div class="init-num" onclick="editInitNum(${i})" title="Click to edit" style="cursor:pointer">${c.init}</div>
       <div style="flex:1">
         <div class="init-name">${c.name}${isActive?` <span style="font-size:.6rem;color:var(--gold);font-family:'Rajdhani',sans-serif;letter-spacing:1px">ACTIVE</span>`:''}</div>
+        ${c.maxHp?`<div class="init-hp-bar" onclick="editInitHP(${i})" title="Click to update HP"><div class="init-hp-fill" style="width:${Math.max(0,Math.round((c.hp/c.maxHp)*100))}%;background:${c.hp/c.maxHp>0.5?'var(--green)':c.hp/c.maxHp>0.25?'var(--amber)':'var(--red)'}"></div></div><div style="font-size:.6rem;color:var(--muted);font-family:Roboto Mono,monospace">${c.hp}/${c.maxHp}</div>`:''}
       </div>
       <div class="init-actions">
         <button class="init-act-btn kill" onclick="killCombatant(${i})" title="${c.dead?'Revive':'Mark Dead'}">${c.dead?'↑':'✕'}</button>
