@@ -4,1577 +4,995 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sergio De La Torre — Tactical HUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0d0f1a;
-  --surface: #12172b;
-  --card: #161d35;
-  --card2: #1c2540;
-  --accent: #e94560;
-  --gold: #f5a623;
-  --green: #00e676;
-  --teal: #00bcd4;
-  --yellow: #ffd54f;
-  --red: #ff5252;
-  --blue: #448aff;
-  --purple: #ce93d8;
-  --purple-dark: #7b1fa2;
-  --text: #dde3f0;
-  --muted: #6b7a99;
-  --border: #1e2d50;
-  --border2: #253360;
-  --glow-gold: 0 0 12px rgba(245,166,35,0.4);
-  --glow-red: 0 0 12px rgba(255,82,82,0.5);
-  --glow-green: 0 0 12px rgba(0,230,118,0.4);
-  --glow-purple: 0 0 12px rgba(206,147,216,0.4);
+:root{
+  --bg:#090c18; --surf:#0f1525; --card:rgba(255,255,255,0.03);
+  --gold:#d4a017; --gold2:#f0c040; --blue:#3d8bff; --purple:#a855f7;
+  --red:#ef4444; --green:#10b981; --teal:#06b6d4; --amber:#f59e0b;
+  --muted:#4b5680; --text:#dde6f0; --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --gG:0 0 14px rgba(16,185,129,0.45); --gR:0 0 14px rgba(239,68,68,0.5);
+  --gB:0 0 14px rgba(61,139,255,0.4); --gP:0 0 14px rgba(168,85,247,0.45); --gA:0 0 14px rgba(212,160,23,0.5);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;min-height:100vh;
+  background-image:linear-gradient(rgba(30,60,120,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(30,60,120,.1) 1px,transparent 1px);
+  background-size:32px 32px;}
+h1,h2,.label-caps{font-family:'Rajdhani',sans-serif}
+.mono{font-family:'Roboto Mono',monospace}
 
-/* ── HEADER ── */
-header {
-  background: linear-gradient(135deg, #0a0e1a 0%, #161d35 100%);
-  border-bottom: 1px solid var(--border2);
-  padding: 14px 20px;
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-  position: sticky; top: 0; z-index: 100;
-}
-.char-title h1 { font-size: 1.4rem; color: #fff; letter-spacing: 2px; font-weight: 900; }
-.char-title p { color: var(--gold); font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; }
-.header-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-.pill {
-  background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
-  border-radius: 16px; padding: 3px 12px; font-size: 0.75rem; white-space: nowrap;
-}
-.pill strong { color: var(--gold); }
-.pill.ac { border-color: rgba(0,188,212,0.4); }
-.pill.init { border-color: rgba(68,138,255,0.4); }
+/* HEADER */
+header{background:linear-gradient(135deg,#080b16,#111827);border-bottom:1px solid rgba(212,160,23,.3);
+  padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.char-title h1{font-size:1.5rem;color:#fff;letter-spacing:3px;text-transform:uppercase}
+.char-title p{color:var(--gold);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;margin-top:2px;font-family:'Rajdhani',sans-serif}
+.hpills{display:flex;gap:7px;flex-wrap:wrap}
+.hpill{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:20px;padding:4px 13px;
+  font-size:.72rem;font-family:'Roboto Mono',monospace;white-space:nowrap}
+.hpill strong{color:var(--gold2)}
 
-/* ── STATUS BAR ── */
-.status-bar {
-  background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border);
-  padding: 6px 20px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-}
-.status-bar label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
-.chip {
-  padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700;
-  cursor: pointer; border: 1px solid #333; color: #555; background: transparent;
-  transition: all 0.2s; user-select: none;
-}
-.chip.on-buff  { border-color: var(--green); color: var(--green); background: rgba(0,230,118,0.1); box-shadow: var(--glow-green); }
-.chip.on-debuff { border-color: var(--red); color: var(--red); background: rgba(255,82,82,0.1); box-shadow: var(--glow-red); }
-.chip.on-neutral { border-color: var(--blue); color: var(--blue); background: rgba(68,138,255,0.1); }
+/* STATUS BAR */
+.statusbar{background:rgba(0,0,0,.35);border-bottom:1px solid var(--border);padding:5px 20px;
+  display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.sblabel{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-right:4px;font-family:'Rajdhani',sans-serif}
+.chip{padding:3px 11px;border-radius:20px;font-size:.68rem;font-weight:600;cursor:pointer;
+  border:1px solid #2a3555;color:#3a4a6a;background:transparent;transition:all .2s;user-select:none;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.chip.buff{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.12);box-shadow:var(--gG)}
+.chip.debuff{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.1);box-shadow:var(--gR)}
+.chip.neutral{border-color:var(--blue);color:var(--blue);background:rgba(61,139,255,.1)}
 
-/* ── LAYOUT ── */
-.layout {
-  display: grid;
-  grid-template-columns: 280px 1fr 300px;
-  gap: 16px; padding: 16px 20px; max-width: 1600px; margin: 0 auto;
-}
-@media (max-width: 1200px) { .layout { grid-template-columns: 260px 1fr; } .right-panel { display: none; } }
-@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:270px 1fr 290px;gap:14px;padding:14px 18px;max-width:1580px;margin:0 auto}
+@media(max-width:1200px){.layout{grid-template-columns:250px 1fr}.rpanel{display:none}}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.rpanel{display:none}}
 
-/* ── CARDS ── */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
-.card:last-child { margin-bottom: 0; }
-.ch { background: var(--card2); padding: 8px 14px; border-bottom: 1px solid var(--border); font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 6px; }
-.cb { padding: 12px 14px; }
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;
+  backdrop-filter:blur(4px);transition:border-color .2s}
+.card:last-child{margin-bottom:0}
+.card:hover{border-color:var(--border2)}
+.ch{padding:9px 14px;font-family:'Rajdhani',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid var(--border)}
+.cb{padding:13px 14px}
+.divider{height:1px;background:var(--border);margin:10px 0}
 
-/* ── HP ── */
-.hp-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; }
-.hp-block .lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
-.hp-num { font-size: 2rem; font-weight: 900; line-height: 1; }
-.hp-num.current { color: var(--green); }
-.hp-num.max { color: #3a5a3a; font-size: 1.1rem; }
-input.hp-in {
-  background: rgba(0,230,118,0.08); border: 1.5px solid var(--green); border-radius: 7px;
-  color: var(--green); font-size: 1.5rem; font-weight: 900; text-align: center; padding: 4px 6px; width: 72px;
-}
-input.hp-in:focus { outline: none; box-shadow: var(--glow-green); }
-input.tmp-in {
-  background: rgba(68,138,255,0.08); border: 1.5px solid var(--blue); border-radius: 7px;
-  color: var(--blue); font-size: 1.1rem; font-weight: 700; text-align: center; padding: 4px 6px; width: 56px;
-}
-.bar-wrap { height: 7px; background: #111; border-radius: 4px; overflow: hidden; margin: 6px 0; }
-.bar { height: 100%; border-radius: 4px; transition: width 0.4s, background 0.4s; }
-.hp-btns { display: flex; gap: 5px; margin-top: 6px; }
-input.adj-in { width: 52px; background: rgba(255,255,255,0.05); border: 1px solid var(--border2); border-radius: 5px; color: var(--text); text-align: center; padding: 4px; }
-.btn { border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.72rem; font-weight: 800; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; }
-.btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
-.btn-dmg { background: var(--red); color: #fff; }
-.btn-heal { background: var(--green); color: #000; }
-.btn-sr { background: var(--yellow); color: #000; }
-.btn-lr { background: var(--accent); color: #fff; }
-.btn-blue { background: var(--blue); color: #fff; }
-.btn-gray { background: #252f4a; color: var(--text); }
+/* HP DISPLAY */
+.hp-display{display:flex;gap:12px;align-items:stretch;margin-bottom:10px}
+.hp-ring-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+.hp-ring-svg{width:80px;height:80px;transform:rotate(-90deg)}
+.hp-ring-bg{fill:none;stroke:#1a2540;stroke-width:6}
+.hp-ring-bar{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .5s,stroke .4s}
+.hp-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hp-ring-pct{font-size:.65rem;color:var(--muted);font-family:'Roboto Mono',monospace}
+.hp-ring-num{font-size:1.2rem;font-weight:700;font-family:'Roboto Mono',monospace;color:var(--green);line-height:1}
+.hp-fields{flex:1;display:flex;flex-direction:column;gap:6px}
+.hp-row2{display:flex;gap:8px;align-items:center}
+.hp-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:'Rajdhani',sans-serif;margin-bottom:2px}
+input.hpin{background:rgba(16,185,129,.07);border:1.5px solid var(--green);border-radius:7px;
+  color:var(--green);font-size:1.3rem;font-weight:700;text-align:center;padding:4px 6px;width:68px;
+  font-family:'Roboto Mono',monospace}
+input.hpin:focus{outline:none;box-shadow:var(--gG)}
+input.tmpin{background:rgba(61,139,255,.07);border:1.5px solid var(--blue);border-radius:7px;
+  color:var(--blue);font-size:1rem;font-weight:700;text-align:center;padding:4px 6px;width:56px;
+  font-family:'Roboto Mono',monospace}
+.hp-btns{display:flex;gap:5px;margin-top:4px}
+input.adjin{width:50px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);text-align:center;padding:4px;font-family:'Roboto Mono',monospace}
+.btn{border:none;border-radius:7px;padding:5px 11px;font-size:.7rem;font-weight:700;cursor:pointer;
+  letter-spacing:.5px;transition:all .2s;font-family:'Rajdhani',sans-serif}
+.btn:hover{filter:brightness(1.2);transform:translateY(-1px)}
+.bdmg{background:var(--red);color:#fff} .bheal{background:var(--green);color:#000}
+.bsr{background:var(--amber);color:#000} .blr{background:#7c2d2d;color:#fca5a5;border:1px solid var(--red)}
+.bgray{background:#1e2d4a;color:var(--text)} .bblue{background:rgba(61,139,255,.2);color:var(--blue);border:1px solid rgba(61,139,255,.4)}
 
-.ds-row { display: flex; gap: 14px; margin-top: 8px; }
-.ds-g .ds-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
-.ds-g.s .ds-lbl { color: var(--green); }
-.ds-g.f .ds-lbl { color: var(--red); }
-.pips-row { display: flex; gap: 5px; }
-.ds-pip { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #333; cursor: pointer; transition: all 0.2s; }
-.ds-pip.sf { background: var(--green); border-color: var(--green); }
-.ds-pip.ff { background: var(--red); border-color: var(--red); }
+/* DEATH SAVES */
+.ds-row{display:flex;gap:14px;margin-top:8px}
+.ds-g .ds-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-family:'Rajdhani',sans-serif}
+.ds-g.s .ds-lbl{color:var(--green)} .ds-g.f .ds-lbl{color:var(--red)}
+.ds-pips{display:flex;gap:5px}
+.ds-pip{width:18px;height:18px;border-radius:50%;border:2px solid #2a3555;cursor:pointer;transition:all .2s}
+.ds-pip.sf{background:var(--green);border-color:var(--green)} .ds-pip.ff{background:var(--red);border-color:var(--red)}
 
-/* ── RESOURCE PIPS ── */
-.res-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
-.res-info .res-name { font-weight: 700; font-size: 0.85rem; }
-.res-info .res-sub { font-size: 0.66rem; color: var(--muted); margin-top: 1px; }
-.pips { display: flex; gap: 4px; }
-.pip {
-  width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--gold);
-  background: var(--gold); cursor: pointer; transition: all 0.2s; display: flex;
-  align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 900; color: #000;
-}
-.pip.empty { background: transparent; border-color: #2a3555; color: #2a3555; }
-.pip:hover { transform: scale(1.2); }
-.sd-pip { border-color: var(--purple-dark); background: var(--purple); color: #fff; width: 26px; height: 26px; font-size: 0.6rem; border-radius: 5px; }
-.sd-pip.empty { background: transparent; border-color: #2a3555; color: #2a3555; }
+/* RESOURCE PIPS */
+.res-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.res-name{font-weight:600;font-size:.83rem;margin-bottom:1px}
+.res-sub{font-size:.64rem;color:var(--muted)}
+.pips{display:flex;gap:4px}
+.pip{width:20px;height:20px;border-radius:50%;border:2px solid var(--gold);background:var(--gold);
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
+  font-size:.5rem;font-weight:900;color:#000}
+.pip.e{background:transparent;border-color:#1e2d50;color:#1e2d50}
+.pip:hover{transform:scale(1.2)}
 
-/* ── ABILITY SCORES ── */
-.ab-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.ab-box { background: var(--card2); border: 1px solid var(--border); border-radius: 7px; padding: 6px; text-align: center; }
-.ab-name { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-.ab-score { font-size: 1.3rem; font-weight: 900; color: #fff; }
-.ab-mod { font-size: 0.75rem; color: var(--gold); font-weight: 700; }
+/* SUPERIORITY DICE — diamond shape */
+.sd-pips{display:flex;gap:6px;flex-wrap:wrap}
+.sdp{width:28px;height:28px;transform:rotate(45deg);border:2px solid var(--purple);background:var(--purple);
+  cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;border-radius:4px}
+.sdp span{transform:rotate(-45deg);font-size:.55rem;font-weight:700;color:#fff;font-family:'Roboto Mono',monospace}
+.sdp.e{background:transparent;border-color:#1e2d50}
+.sdp.e span{color:#1e2d50}
+.sdp:hover{transform:rotate(45deg) scale(1.15)}
 
-/* ── BADGES ── */
-.badge { display: inline-block; font-size: 0.62rem; padding: 1px 6px; border-radius: 4px; font-weight: 800; vertical-align: middle; }
-.b-lr { background: rgba(233,69,96,0.2); color: #ff8fa3; border: 1px solid var(--accent); }
-.b-sr { background: rgba(255,213,79,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
-.b-turn { background: rgba(0,188,212,0.15); color: var(--teal); border: 1px solid var(--teal); }
+/* ABILITY SCORES */
+.ab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ab-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:7px;text-align:center;transition:border-color .2s}
+.ab-box:hover{border-color:var(--border2)}
+.ab-name{font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:'Rajdhani',sans-serif}
+.ab-score{font-size:1.35rem;font-weight:700;color:#fff;font-family:'Roboto Mono',monospace}
+.ab-mod{font-size:.75rem;color:var(--gold);font-weight:700;font-family:'Roboto Mono',monospace}
 
-/* ── TACTICAL ADVISOR ── */
-.advisor-wrap {
-  background: linear-gradient(135deg, #0d1530 0%, #12172b 100%);
-  border: 1px solid var(--border2); border-radius: 12px; padding: 14px; margin-bottom: 14px;
-  position: relative; overflow: hidden;
-}
-.advisor-wrap::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--gold), var(--green));
-}
-.advisor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.advisor-title { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); }
-.advisor-phase {
-  font-size: 0.65rem; padding: 2px 10px; border-radius: 10px; font-weight: 700;
-  background: rgba(68,138,255,0.15); color: var(--blue); border: 1px solid rgba(68,138,255,0.3);
-}
-.advice-cards { display: flex; flex-direction: column; gap: 8px; }
-.advice-card {
-  border-radius: 8px; padding: 10px 12px; border-left: 3px solid;
-  display: flex; align-items: flex-start; gap: 10px;
-  animation: fadeIn 0.3s ease;
-}
-.advice-card.priority-critical { border-color: var(--red); background: rgba(255,82,82,0.08); }
-.advice-card.priority-high { border-color: var(--gold); background: rgba(245,166,35,0.08); }
-.advice-card.priority-med { border-color: var(--blue); background: rgba(68,138,255,0.07); }
-.advice-card.priority-low { border-color: var(--muted); background: rgba(107,122,153,0.07); }
-.advice-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
-.advice-body { flex: 1; }
-.advice-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px; }
-.advice-card.priority-critical .advice-label { color: var(--red); }
-.advice-card.priority-high .advice-label { color: var(--gold); }
-.advice-card.priority-med .advice-label { color: var(--blue); }
-.advice-card.priority-low .advice-label { color: var(--muted); }
-.advice-text { font-size: 0.8rem; color: var(--text); line-height: 1.45; }
-.advice-text strong { color: var(--gold); }
-.no-advice { color: var(--muted); font-size: 0.8rem; font-style: italic; text-align: center; padding: 10px; }
+/* TAGS */
+.tag{display:inline-block;font-size:.58rem;padding:1px 6px;border-radius:3px;font-weight:700;vertical-align:middle;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.tlr{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.4)}
+.tsr{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+.tpa{background:rgba(6,182,212,.12);color:var(--teal);border:1px solid rgba(6,182,212,.3)}
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+/* TACTICAL ADVISOR */
+.advisor{border-radius:10px;border:1px solid rgba(212,160,23,.25);overflow:hidden;margin-bottom:12px;position:relative}
+.advisor::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);z-index:0}
+.adv-header{background:linear-gradient(135deg,#0a1020,#111827);padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(212,160,23,.2);position:relative;z-index:1}
+.adv-title{font-family:'Rajdhani',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold)}
+.adv-phase{font-size:.65rem;padding:3px 12px;border-radius:12px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:1px;
+  background:rgba(61,139,255,.15);color:var(--blue);border:1px solid rgba(61,139,255,.3)}
+.adv-body{padding:10px 12px;background:rgba(9,12,24,.7);position:relative;z-index:1;min-height:80px}
+.advc{border-radius:8px;padding:9px 11px;border-left:3px solid;display:flex;gap:9px;margin-bottom:7px;animation:fadeIn .3s}
+.advc:last-child{margin-bottom:0}
+.advc.critical{border-color:var(--red);background:rgba(239,68,68,.07);box-shadow:inset 0 0 20px rgba(239,68,68,.04)}
+.advc.high{border-color:var(--gold);background:rgba(212,160,23,.07)}
+.advc.med{border-color:var(--blue);background:rgba(61,139,255,.06)}
+.advc.low{border-color:var(--muted);background:rgba(75,86,128,.06)}
+.advc-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.advc-label{font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;font-family:'Rajdhani',sans-serif}
+.advc.critical .advc-label{color:var(--red)} .advc.high .advc-label{color:var(--gold)}
+.advc.med .advc-label{color:var(--blue)} .advc.low .advc-label{color:var(--muted)}
+.advc-text{font-size:.78rem;color:var(--text);line-height:1.5}
+.advc-text strong{color:var(--gold2)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── COMBAT TURN ── */
-.turn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-.turn-slot {
-  border-radius: 8px; border: 1.5px solid; padding: 10px 8px; text-align: center;
-  cursor: pointer; transition: all 0.25s; position: relative;
-}
-.turn-slot:hover { filter: brightness(1.15); }
-.turn-slot.spent { opacity: 0.28; filter: grayscale(0.7); pointer-events: none; }
-.turn-slot.ts-action { border-color: rgba(68,138,255,0.5); }
-.turn-slot.ts-bonus  { border-color: rgba(206,147,216,0.5); }
-.turn-slot.ts-react  { border-color: rgba(255,82,82,0.5); }
-.turn-slot.ts-move   { border-color: rgba(0,230,118,0.5); }
-.ts-icon { font-size: 1.3rem; margin-bottom: 4px; }
-.ts-name { font-size: 0.66rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-.ts-detail { font-size: 0.62rem; color: var(--muted); margin-top: 2px; }
-.attack-track { display: flex; gap: 5px; align-items: center; }
-.atk-pip {
-  width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--green);
-  background: var(--green); color: #000; font-weight: 900; font-size: 0.75rem;
-  display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
-}
-.atk-pip.used { background: transparent; border-color: #1e2d50; color: #1e2d50; }
-.turn-btns { display: flex; gap: 6px; margin-top: 8px; }
+/* COMBAT SLOTS */
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.slot{border-radius:9px;border:1.5px solid;padding:10px 6px;text-align:center;cursor:pointer;
+  transition:all .22s;position:relative;background:rgba(255,255,255,.02)}
+.slot:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.slot.spent{opacity:.22;cursor:default;filter:grayscale(.7)}
+.slot.spent::after{content:'✗';position:absolute;top:4px;right:6px;font-size:.65rem;color:#555}
+.sa{border-color:rgba(61,139,255,.5);box-shadow:inset 0 0 20px rgba(61,139,255,.04)}
+.sb{border-color:rgba(168,85,247,.5);box-shadow:inset 0 0 20px rgba(168,85,247,.04)}
+.sr{border-color:rgba(239,68,68,.5);box-shadow:inset 0 0 20px rgba(239,68,68,.04)}
+.sm{border-color:rgba(16,185,129,.4);box-shadow:inset 0 0 20px rgba(16,185,129,.03)}
+.slot-icon{font-size:1.4rem;margin-bottom:3px}
+.slot-name{font-size:.63rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
+.slot-detail{font-size:.6rem;color:var(--muted);margin-top:1px}
+.sa .slot-name{color:var(--blue)} .sb .slot-name{color:var(--purple)}
+.sr .slot-name{color:var(--red)} .sm .slot-name{color:var(--green)}
 
-/* ── POWER COMBOS ── */
-.combos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.combo-card {
-  background: var(--card2); border: 1px solid var(--border2); border-radius: 10px;
-  padding: 12px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
-}
-.combo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.combo-card.c-burst::before { background: linear-gradient(90deg, var(--gold), var(--accent)); }
-.combo-card.c-viper::before { background: linear-gradient(90deg, #00c853, #64dd17); }
-.combo-card.c-ghost::before { background: linear-gradient(90deg, var(--blue), var(--teal)); }
-.combo-card.c-iron::before { background: linear-gradient(90deg, var(--teal), var(--blue)); }
-.combo-card.c-control::before { background: linear-gradient(90deg, var(--purple), var(--purple-dark)); }
-.combo-card.c-read::before { background: linear-gradient(90deg, var(--accent), var(--red)); }
-.combo-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-.combo-card.active-combo { border-color: var(--gold); box-shadow: var(--glow-gold); }
-.combo-card.unavailable { opacity: 0.4; cursor: not-allowed; }
-.combo-card.unavailable:hover { transform: none; box-shadow: none; }
-.combo-name { font-weight: 900; font-size: 0.9rem; margin-bottom: 2px; }
-.combo-card.c-burst .combo-name { color: var(--gold); }
-.combo-card.c-viper .combo-name { color: #69f0ae; }
-.combo-card.c-ghost .combo-name { color: var(--teal); }
-.combo-card.c-iron .combo-name { color: var(--blue); }
-.combo-card.c-control .combo-name { color: var(--purple); }
-.combo-card.c-read .combo-name { color: var(--accent); }
-.combo-cost { font-size: 0.65rem; color: var(--muted); margin-bottom: 6px; }
-.combo-steps { font-size: 0.75rem; color: #aabbd4; line-height: 1.6; }
-.combo-steps strong { color: var(--text); }
-.combo-dmg { margin-top: 8px; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-block; }
-.combo-card.c-burst .combo-dmg { background: rgba(245,166,35,0.15); color: var(--gold); }
-.combo-card.c-viper .combo-dmg { background: rgba(0,200,83,0.15); color: #69f0ae; }
-.combo-card.c-ghost .combo-dmg { background: rgba(0,188,212,0.15); color: var(--teal); }
-.combo-card.c-iron .combo-dmg  { background: rgba(68,138,255,0.15); color: var(--blue); }
-.combo-card.c-control .combo-dmg { background: rgba(206,147,216,0.15); color: var(--purple); }
-.combo-card.c-read .combo-dmg { background: rgba(233,69,96,0.15); color: var(--accent); }
-.combo-avail { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; font-weight: 800; padding: 1px 6px; border-radius: 4px; }
-.avail-yes { background: rgba(0,230,118,0.2); color: var(--green); border: 1px solid var(--green); }
-.avail-no  { background: rgba(107,122,153,0.15); color: var(--muted); border: 1px solid #333; }
+/* ATTACK PIPS */
+.atk-row{display:flex;gap:5px;align-items:center}
+.atkp{width:32px;height:32px;border-radius:50%;border:2px solid var(--green);background:var(--green);
+  color:#000;font-weight:900;font-size:.78rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;font-family:'Roboto Mono',monospace}
+.atkp.u{background:transparent;border-color:#1e2d50;color:#1e2d50}
 
-/* ── MANEUVERS ── */
-.man-list { display: flex; flex-direction: column; gap: 6px; }
-.man {
-  background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
-  padding: 9px 12px; display: flex; align-items: flex-start; gap: 8px;
-  cursor: pointer; transition: all 0.2s; position: relative;
-}
-.man:hover { border-color: var(--purple-dark); }
-.man.used-man { border-color: #2a3555; opacity: 0.55; }
-.man.used-man .man-name { text-decoration: line-through; }
-.man-info { flex: 1; }
-.man-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 3px; }
-.timing { display: inline-flex; align-items: center; font-size: 0.65rem; padding: 1px 7px; border-radius: 8px; font-weight: 700; margin-bottom: 4px; }
-.t-action  { background: rgba(68,138,255,0.15); color: var(--blue); border: 1px solid rgba(68,138,255,0.4); }
-.t-bonus   { background: rgba(206,147,216,0.15); color: var(--purple); border: 1px solid rgba(206,147,216,0.4); }
-.t-react   { background: rgba(255,82,82,0.15); color: var(--red); border: 1px solid rgba(255,82,82,0.4); }
-.t-special { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
-.man-desc { font-size: 0.74rem; color: var(--muted); line-height: 1.4; }
-.man-desc strong { color: var(--gold); }
-.man-cost { font-size: 0.65rem; color: var(--purple); font-weight: 800; white-space: nowrap; padding-top: 1px; }
-.man-used-badge { position: absolute; top: 5px; right: 7px; font-size: 0.6rem; background: var(--purple); color: #fff; border-radius: 3px; padding: 1px 5px; font-weight: 800; }
+/* MANEUVER CARDS */
+.man-list{display:flex;flex-direction:column;gap:7px}
+.man{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);
+  cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+.man:hover{border-color:var(--border2);transform:translateX(2px)}
+.man.used{opacity:.45;border-color:#1a2540}
+.man-stripe{width:4px;flex-shrink:0}
+.man-stripe.ta{background:var(--blue)} .man-stripe.tb{background:var(--purple)}
+.man-stripe.tr{background:var(--red)} .man-stripe.ts{background:var(--green)}
+.man-body{flex:1;padding:8px 10px}
+.man-name{font-weight:700;font-size:.86rem;margin-bottom:3px;font-family:'Rajdhani',sans-serif;letter-spacing:.3px}
+.timing{display:inline-flex;align-items:center;font-size:.63rem;padding:1px 7px;border-radius:6px;font-weight:700;margin-bottom:4px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.ta-t{background:rgba(61,139,255,.15);color:var(--blue);border:1px solid rgba(61,139,255,.3)}
+.tb-t{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+.tr-t{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.ts-t{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.man-desc{font-size:.74rem;color:#8899bb;line-height:1.45}
+.man-desc strong{color:var(--gold2)}
+.man-cost{padding:8px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:.65rem;color:var(--purple);font-weight:700;font-family:'Roboto Mono',monospace;white-space:nowrap;
+  border-left:1px solid var(--border);min-width:44px}
+.man-badge{display:block;background:var(--red);color:#fff;border-radius:3px;padding:1px 4px;font-size:.55rem;font-weight:700;margin-top:4px;text-align:center}
 
-/* ── ENEMY TRACKER ── */
-.enemy-slot {
-  background: var(--card2); border: 1px solid var(--border); border-radius: 9px;
-  padding: 10px 12px; margin-bottom: 8px;
-}
-.enemy-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-input.enemy-name {
-  flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border2);
-  color: var(--text); font-weight: 700; font-size: 0.85rem; padding: 2px 0;
-}
-input.enemy-name:focus { outline: none; border-bottom-color: var(--gold); }
-.enemy-hp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.enemy-hp-row .lbl { font-size: 0.62rem; color: var(--muted); width: 24px; }
-input.enemy-hp { width: 50px; background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.3); border-radius: 5px; color: var(--red); text-align: center; padding: 3px; font-weight: 700; }
-input.enemy-hp:focus { outline: none; border-color: var(--red); }
-.enemy-cond { display: flex; flex-wrap: wrap; gap: 4px; }
-.econd {
-  padding: 2px 8px; border-radius: 8px; font-size: 0.65rem; font-weight: 700;
-  cursor: pointer; border: 1px solid #333; color: #444; transition: all 0.15s;
-}
-.econd.active { border-color: var(--red); color: var(--red); background: rgba(255,82,82,0.1); }
-.econd.vex-active { border-color: var(--purple); color: var(--purple); background: rgba(206,147,216,0.1); }
-.econd.poison-active { border-color: #69f0ae; color: #69f0ae; background: rgba(0,200,83,0.1); }
+/* POWER COMBOS */
+.combo-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ccard{border-radius:9px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .22s;background:rgba(255,255,255,.02)}
+.ccard:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.ccard.unavail{opacity:.38;cursor:not-allowed}
+.ccard.unavail:hover{transform:none;box-shadow:none}
+.ccard.active{border-color:var(--gold);box-shadow:var(--gA)}
+.ccard-head{padding:8px 11px;display:flex;align-items:center;justify-content:space-between}
+.cname{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.9rem}
+.cavail{font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:10px;font-family:'Rajdhani',sans-serif}
+.avail{background:rgba(16,185,129,.2);color:var(--green);border:1px solid rgba(16,185,129,.4)}
+.no-avail{background:rgba(75,86,128,.15);color:var(--muted);border:1px solid #2a3555}
+.ccard-body{padding:8px 11px;border-top:1px solid var(--border)}
+.csteps{font-size:.74rem;color:#8899bb;line-height:1.65}
+.csteps strong{color:var(--text)}
+.cdmg{margin-top:7px;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:4px;display:inline-block;font-family:'Roboto Mono',monospace}
+/* combo colors */
+.c-burst .ccard-head{background:linear-gradient(135deg,rgba(212,160,23,.12),rgba(239,68,68,.06))}
+.c-burst .cname{color:var(--gold2)} .c-burst .cdmg{background:rgba(212,160,23,.15);color:var(--gold2)}
+.c-viper .ccard-head{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(6,182,212,.05))}
+.c-viper .cname{color:var(--green)} .c-viper .cdmg{background:rgba(16,185,129,.15);color:var(--green)}
+.c-ghost .ccard-head{background:linear-gradient(135deg,rgba(61,139,255,.1),rgba(6,182,212,.06))}
+.c-ghost .cname{color:var(--teal)} .c-ghost .cdmg{background:rgba(6,182,212,.15);color:var(--teal)}
+.c-iron .ccard-head{background:linear-gradient(135deg,rgba(61,139,255,.1),rgba(168,85,247,.06))}
+.c-iron .cname{color:var(--blue)} .c-iron .cdmg{background:rgba(61,139,255,.15);color:var(--blue)}
+.c-control .ccard-head{background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(239,68,68,.05))}
+.c-control .cname{color:var(--purple)} .c-control .cdmg{background:rgba(168,85,247,.15);color:var(--purple)}
+.c-read .ccard-head{background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(245,158,11,.06))}
+.c-read .cname{color:#f87171} .c-read .cdmg{background:rgba(239,68,68,.12);color:#f87171}
 
-/* ── WEAPONS ── */
-.weapon-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-.weapon-row:last-child { border-bottom: none; }
-.w-main { flex: 1; }
-.w-name { font-weight: 700; font-size: 0.85rem; }
-.w-props { font-size: 0.67rem; color: var(--muted); margin-top: 2px; }
-.w-stat { text-align: right; }
-.w-hit { color: var(--green); font-weight: 800; font-size: 0.95rem; }
-.w-dmg { color: var(--gold); font-weight: 700; font-size: 0.8rem; }
-.mastery-tag { display: inline-block; font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; font-weight: 800; margin-right: 3px; }
-.mt-vex { background: rgba(206,147,216,0.2); color: var(--purple); border: 1px solid rgba(206,147,216,0.4); }
-.mt-nick { background: rgba(68,138,255,0.2); color: var(--blue); border: 1px solid rgba(68,138,255,0.4); }
+/* WEAPONS */
+.weap-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.weap-row:last-child{border-bottom:none}
+.winfo{flex:1}
+.wname{font-weight:700;font-size:.86rem;font-family:'Rajdhani',sans-serif;letter-spacing:.3px}
+.wprop{font-size:.66rem;color:var(--muted);margin-top:2px}
+.mtag{display:inline-block;font-size:.58rem;padding:1px 5px;border-radius:3px;font-weight:700;margin-right:3px;font-family:'Rajdhani',sans-serif}
+.mv{background:rgba(168,85,247,.2);color:var(--purple);border:1px solid rgba(168,85,247,.35)}
+.mn{background:rgba(61,139,255,.2);color:var(--blue);border:1px solid rgba(61,139,255,.35)}
+.wstat{text-align:right;flex-shrink:0}
+.whit{color:var(--green);font-weight:700;font-size:.95rem;font-family:'Roboto Mono',monospace}
+.wdmg{color:var(--gold);font-size:.78rem;font-family:'Roboto Mono',monospace}
 
-/* ── AMMO ── */
-.ammo-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-.ammo-row:last-child { border-bottom: none; }
-.ammo-name { font-size: 0.8rem; font-weight: 600; }
-.ammo-sub { font-size: 0.65rem; color: var(--muted); }
-.ammo-ctrl { display: flex; align-items: center; gap: 6px; }
-.ammo-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
-.ammo-btn:hover { background: var(--border2); }
-.ammo-count { font-size: 1rem; font-weight: 900; min-width: 24px; text-align: center; color: var(--gold); }
+/* AMMO */
+.ammo-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.ammo-row:last-child{border-bottom:none}
+.ammo-name{font-size:.8rem;font-weight:600}
+.ammo-sub{font-size:.63rem;color:var(--muted)}
+.ammo-ctrl{display:flex;align-items:center;gap:6px}
+.abtn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border2);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.abtn:hover{background:var(--border2)}
+.acount{font-size:1rem;font-weight:900;min-width:24px;text-align:center;color:var(--gold);font-family:'Roboto Mono',monospace}
 
-/* ── SKILLS ── */
-.skill-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.sk { display: flex; align-items: center; gap: 5px; padding: 2px 0; }
-.sk-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #1e2d50; flex-shrink: 0; }
-.sk-dot.p { background: var(--gold); border-color: var(--gold); }
-.sk-name { font-size: 0.74rem; flex: 1; }
-.sk-mod { font-size: 0.74rem; font-weight: 800; color: var(--gold); }
+/* ENEMY TRACKER */
+.enemy-slot{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px}
+.enemy-slot:last-child{margin-bottom:0}
+.e-label{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);
+  margin-bottom:6px;font-family:'Rajdhani',sans-serif;display:flex;align-items:center;justify-content:space-between}
+.e-header{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+input.ename{flex:1;background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-weight:600;font-size:.85rem;padding:2px 0;font-family:'Rajdhani',sans-serif}
+input.ename:focus{outline:none;border-bottom-color:var(--gold)}
+input.ehp{width:48px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:5px;color:var(--red);text-align:center;padding:3px;font-weight:700;font-family:'Roboto Mono',monospace}
+input.ehp:focus{outline:none;border-color:var(--red)}
+.econd-row{display:flex;flex-wrap:wrap;gap:4px}
+.ec{padding:2px 8px;border-radius:10px;font-size:.63rem;font-weight:700;cursor:pointer;border:1px solid #252f4a;color:#3a4a6a;transition:all .15s;font-family:'Rajdhani',sans-serif}
+.ec.vex{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,.1)}
+.ec.poison{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.1)}
+.ec.on{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.1)}
 
-/* ── FEATURES ── */
-.feat-item { border-left: 2px solid var(--gold); padding: 8px 10px; margin-bottom: 8px; background: rgba(245,166,35,0.04); border-radius: 0 6px 6px 0; }
-.feat-item.passive { border-color: var(--green); background: rgba(0,230,118,0.04); }
-.feat-item.lr { border-color: var(--accent); background: rgba(233,69,96,0.04); }
-.feat-name { font-weight: 800; font-size: 0.85rem; margin-bottom: 4px; }
-.feat-desc { font-size: 0.76rem; color: #aabbd4; line-height: 1.45; }
-.feat-desc strong { color: var(--text); }
+/* SKILLS */
+.skill-2col{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.sk{display:flex;align-items:center;gap:5px;padding:2px 0}
+.skd{width:8px;height:8px;border-radius:50%;border:2px solid #1e2d50;flex-shrink:0}
+.skd.p{background:var(--gold);border-color:var(--gold)}
+.skn{font-size:.72rem;flex:1}
+.skm{font-size:.72rem;font-weight:700;color:var(--gold);font-family:'Roboto Mono',monospace}
 
-/* ── ENCOUNTER LOG ── */
-.log-area { height: 100px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px; font-size: 0.75rem; color: var(--muted); font-family: monospace; }
-.log-area .log-entry { margin-bottom: 2px; }
-.log-entry .le-time { color: #3a5a6a; }
-.log-entry .le-action { color: var(--teal); }
-.log-entry .le-value { color: var(--gold); }
-.log-clear { margin-top: 5px; }
+/* FEATURES */
+.feat{padding:9px 12px;margin-bottom:7px;border-radius:7px;border-left:3px solid var(--gold);background:rgba(212,160,23,.04)}
+.feat.passive{border-color:var(--green);background:rgba(16,185,129,.04)}
+.feat.lr{border-color:var(--red);background:rgba(239,68,68,.04)}
+.feat-name{font-weight:700;font-size:.86rem;margin-bottom:4px;font-family:'Rajdhani',sans-serif;letter-spacing:.3px}
+.feat-desc{font-size:.75rem;color:#8899bb;line-height:1.5}
+.feat-desc strong{color:var(--text)}
 
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 10px 0; }
+/* LOG */
+.log-area{height:100px;overflow-y:auto;background:rgba(0,0,0,.35);border-radius:6px;padding:8px;
+  font-size:.72rem;color:var(--muted);font-family:'Roboto Mono',monospace}
+.le-t{color:#2a4050} .le-a{color:var(--teal)}
 
-/* ── TABS ── */
-.tabs { display: flex; border-bottom: 1px solid var(--border); }
-.tab { padding: 8px 14px; cursor: pointer; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
-.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-.tab-pane { display: none; }
-.tab-pane.active { display: block; }
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2)}
+.tab{padding:8px 14px;cursor:pointer;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;font-family:'Rajdhani',sans-serif}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tabp{display:none;padding:12px 14px} .tabp.active{display:block}
 
-/* ── FLASH TOAST ── */
-.toast {
-  position: fixed; bottom: 24px; right: 24px;
-  background: var(--card2); border: 1px solid var(--gold); border-radius: 10px;
-  padding: 12px 20px; font-size: 0.85rem; font-weight: 700; color: var(--gold);
-  box-shadow: var(--glow-gold), 0 10px 40px rgba(0,0,0,0.5);
-  z-index: 9999; transition: opacity 0.4s;
-  max-width: 320px;
-}
+/* COLLAPSIBLE */
+.coll-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.coll-arrow{color:var(--muted);font-size:.8rem;transition:transform .2s}
+.coll-toggle.open .coll-arrow{transform:rotate(180deg)}
+.coll-body{overflow:hidden;transition:max-height .3s;max-height:0}
+.coll-body.open{max-height:9999px}
 
-/* ── MISC ── */
-.section-title { font-size: 0.65rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.highlight { color: var(--gold); font-weight: 700; }
-.tag-lr { display: inline-block; font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; background: rgba(233,69,96,0.15); color: #ff8fa3; border: 1px solid var(--accent); font-weight: 800; }
-.tag-sr { display: inline-block; font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; background: rgba(255,213,79,0.1); color: var(--yellow); border: 1px solid #5a4500; font-weight: 800; }
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:linear-gradient(135deg,#111827,#0f1525);
+  border:1px solid var(--gold);border-radius:10px;padding:11px 18px;font-size:.82rem;font-weight:600;
+  color:var(--gold2);box-shadow:var(--gA),0 10px 40px rgba(0,0,0,.5);z-index:9999;transition:opacity .4s;
+  max-width:300px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
 
-footer { text-align: center; padding: 14px; color: #2a3555; font-size: 0.7rem; border-top: 1px solid var(--border); margin-top: 10px; }
+/* RULE CALLOUT */
+.rule-note{font-size:.68rem;padding:6px 10px;border-radius:6px;background:rgba(245,158,11,.08);
+  border:1px solid rgba(245,158,11,.2);color:#fbbf24;margin-bottom:8px;line-height:1.5}
+.rule-note strong{color:#fcd34d}
 
-.pulse-red { animation: pulseRed 1.5s infinite; }
-@keyframes pulseRed { 0%,100% { box-shadow: none; } 50% { box-shadow: var(--glow-red); } }
-.pulse-gold { animation: pulseGold 2s infinite; }
-@keyframes pulseGold { 0%,100% { box-shadow: none; } 50% { box-shadow: var(--glow-gold); } }
+/* PULSE */
+.pulse-red{animation:pR 1.6s infinite} @keyframes pR{0%,100%{box-shadow:none}50%{box-shadow:var(--gR)}}
+.pulse-gold{animation:pA 2s infinite} @keyframes pA{0%,100%{box-shadow:none}50%{box-shadow:var(--gA)}}
 
-.sd-count-label { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
-.sd-count-label span { color: var(--purple); font-weight: 900; }
+footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:1px solid var(--border);margin-top:8px;font-family:'Rajdhani',sans-serif;letter-spacing:1px}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="char-title">
-    <h1>⚔ SERGIO DE LA TORRE</h1>
+    <h1>⚔ Sergio De La Torre</h1>
     <p>Fighter 11 · Battle Master · Variant Human · Criminal · Lawful Good</p>
   </div>
-  <div class="header-pills">
-    <div class="pill ac">AC <strong>21</strong></div>
-    <div class="pill init">Init <strong>+9</strong> (Alert)</div>
-    <div class="pill">Speed <strong>30 ft</strong></div>
-    <div class="pill">Prof <strong>+4</strong></div>
-    <div class="pill">Passive Perc <strong>11</strong></div>
-    <div class="pill">Maneuver DC <strong>17</strong></div>
+  <div class="hpills">
+    <div class="hpill">AC <strong>21</strong></div>
+    <div class="hpill">Init <strong>+9</strong></div>
+    <div class="hpill">Speed <strong>30 ft</strong></div>
+    <div class="hpill">Prof <strong>+4</strong></div>
+    <div class="hpill">SD Die <strong>d10</strong></div>
+    <div class="hpill">Maneuver DC <strong>17</strong></div>
   </div>
 </header>
 
-<!-- STATUS CHIPS -->
-<div class="status-bar">
-  <label>Conditions:</label>
-  <span class="chip" data-type="on-buff"  onclick="toggleChip(this)">Vex Adv ▲</span>
-  <span class="chip" data-type="on-buff"  onclick="toggleChip(this)">Parried</span>
-  <span class="chip" data-type="on-buff"  onclick="toggleChip(this)">Rallied</span>
-  <span class="chip" data-type="on-buff"  onclick="toggleChip(this)">See Invisible</span>
-  <span class="chip" data-type="on-debuff" onclick="toggleChip(this)">Prone</span>
-  <span class="chip" data-type="on-debuff" onclick="toggleChip(this)">Poisoned</span>
-  <span class="chip" data-type="on-debuff" onclick="toggleChip(this)">Restrained</span>
-  <span class="chip" data-type="on-debuff" onclick="toggleChip(this)">Blinded</span>
-  <span class="chip" data-type="on-neutral" onclick="toggleChip(this)">Concentrating</span>
-  <span class="chip" data-type="on-neutral" onclick="toggleChip(this)">Poison Applied</span>
+<div class="statusbar">
+  <span class="sblabel">Conditions:</span>
+  <span class="chip" data-type="buff"  onclick="tc(this)">Vex Adv ▲</span>
+  <span class="chip" data-type="buff"  onclick="tc(this)">Parried</span>
+  <span class="chip" data-type="buff"  onclick="tc(this)">Rallied</span>
+  <span class="chip" data-type="buff"  onclick="tc(this)">See Invisible</span>
+  <span class="chip" data-type="neutral" onclick="tc(this)">Poison Applied</span>
+  <span class="chip" data-type="debuff" onclick="tc(this)">Prone</span>
+  <span class="chip" data-type="debuff" onclick="tc(this)">Poisoned</span>
+  <span class="chip" data-type="debuff" onclick="tc(this)">Restrained</span>
+  <span class="chip" data-type="debuff" onclick="tc(this)">Blinded</span>
+  <span class="chip" data-type="neutral" onclick="tc(this)">Concentrating</span>
 </div>
 
 <div class="layout">
 
-  <!-- ══════════ LEFT PANEL ══════════ -->
-  <div>
+<!-- ═══ LEFT ═══ -->
+<div>
 
-    <!-- HP -->
-    <div class="card">
-      <div class="ch">❤️ Hit Points</div>
-      <div class="cb">
-        <div class="hp-row">
-          <div class="hp-block">
-            <div class="lbl">Current</div>
-            <input type="number" class="hp-in" id="curHP" value="98" min="0" max="98" oninput="updateHP()">
-          </div>
-          <div class="hp-block" style="margin:0 4px">
-            <div class="lbl">Max</div>
-            <div class="hp-num max">/ 98</div>
-          </div>
-          <div class="hp-block">
-            <div class="lbl">Temp</div>
-            <input type="number" class="tmp-in" id="tmpHP" value="0" min="0">
-          </div>
+<div class="card">
+  <div class="ch">❤ Hit Points</div>
+  <div class="cb">
+    <div class="hp-display">
+      <div class="hp-ring-wrap" id="ringWrap">
+        <svg class="hp-ring-svg" viewBox="0 0 80 80">
+          <circle class="hp-ring-bg" cx="40" cy="40" r="34"/>
+          <circle class="hp-ring-bar" id="hpRing" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="0"/>
+        </svg>
+        <div class="hp-ring-text">
+          <div class="hp-ring-num mono" id="ringNum">98</div>
+          <div class="hp-ring-pct" id="ringPct">100%</div>
         </div>
-        <div class="bar-wrap"><div class="bar" id="hpBar"></div></div>
-        <div class="hp-btns">
-          <input type="number" class="adj-in" id="adjVal" placeholder="±" min="0">
-          <button class="btn btn-dmg" onclick="adjHP(-1)">Damage</button>
-          <button class="btn btn-heal" onclick="adjHP(1)">Heal</button>
+      </div>
+      <div class="hp-fields">
+        <div>
+          <div class="hp-lbl">Current HP</div>
+          <input type="number" class="hpin" id="curHP" value="98" min="0" max="98" oninput="updateHP()">
         </div>
-        <div class="ds-row" id="dsWrap" style="display:none">
-          <div class="ds-g s">
-            <div class="ds-lbl">Successes</div>
-            <div class="pips-row">
-              <div class="ds-pip" onclick="toggleDS(this,'sf')"></div>
-              <div class="ds-pip" onclick="toggleDS(this,'sf')"></div>
-              <div class="ds-pip" onclick="toggleDS(this,'sf')"></div>
-            </div>
-          </div>
-          <div class="ds-g f">
-            <div class="ds-lbl">Failures</div>
-            <div class="pips-row">
-              <div class="ds-pip" onclick="toggleDS(this,'ff')"></div>
-              <div class="ds-pip" onclick="toggleDS(this,'ff')"></div>
-              <div class="ds-pip" onclick="toggleDS(this,'ff')"></div>
-            </div>
-          </div>
+        <div>
+          <div class="hp-lbl">Temp HP</div>
+          <input type="number" class="tmpin" id="tmpHP" value="0" min="0">
         </div>
       </div>
     </div>
-
-    <!-- CORE RESOURCES -->
-    <div class="card">
-      <div class="ch">🔋 Resources</div>
-      <div class="cb">
-
-        <!-- SD -->
-        <div style="margin-bottom:10px">
-          <div class="res-row" style="margin-bottom:5px">
-            <div class="res-info">
-              <div class="res-name">Superiority Dice <span class="tag-sr">Short Rest</span></div>
-              <div class="res-sub">d10 · 1 per attack · DC 17</div>
-            </div>
-          </div>
-          <div class="pips" id="sdPips" style="gap:5px"></div>
-          <div class="sd-count-label">SD remaining: <span id="sdNum">5</span> / 5</div>
-        </div>
-        <div class="divider"></div>
-
-        <!-- Second Wind -->
-        <div class="res-row">
-          <div class="res-info">
-            <div class="res-name">Second Wind <span class="tag-lr">Long Rest</span></div>
-            <div class="res-sub">BA · 1d10+11 HP · Tactical Shift (15 ft, no OA)</div>
-          </div>
-          <div class="pips" id="swPips"></div>
-        </div>
-
-        <!-- Action Surge -->
-        <div class="res-row">
-          <div class="res-info">
-            <div class="res-name">Action Surge <span class="tag-sr">Short Rest</span></div>
-            <div class="res-sub">Special · Extra full action</div>
-          </div>
-          <div class="pips" id="asPips"></div>
-        </div>
-
-        <!-- Indomitable -->
-        <div class="res-row">
-          <div class="res-info">
-            <div class="res-name">Indomitable <span class="tag-lr">Long Rest</span></div>
-            <div class="res-sub">Special · Reroll save with +11 bonus</div>
-          </div>
-          <div class="pips" id="indPips"></div>
-        </div>
-
-        <!-- Know Your Enemy -->
-        <div class="res-row">
-          <div class="res-info">
-            <div class="res-name">Know Your Enemy <span class="tag-lr">Long Rest</span></div>
-            <div class="res-sub">BA · Learn immunities/resists · Restore via 1 SD</div>
-          </div>
-          <div class="pips" id="kyePips"></div>
-        </div>
-
-        <div class="divider"></div>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-sr" style="flex:1" onclick="doShortRest()">⏱ Short Rest</button>
-          <button class="btn btn-lr" style="flex:1" onclick="doLongRest()">🌙 Long Rest</button>
-        </div>
-      </div>
+    <div class="hp-btns">
+      <input type="number" class="adjin" id="adjV" placeholder="±">
+      <button class="btn bdmg" onclick="adjHP(-1)">Damage</button>
+      <button class="btn bheal" onclick="adjHP(1)">Heal</button>
     </div>
-
-    <!-- HIT DICE -->
-    <div class="card">
-      <div class="ch">🎲 Hit Dice — 11d10</div>
-      <div class="cb">
-        <div class="pips" id="hdPips" style="flex-wrap:wrap;gap:5px"></div>
-        <div style="margin-top:8px;display:flex;gap:6px">
-          <button class="btn btn-gray" onclick="useHD()">Use 1 HD</button>
-          <span style="font-size:0.72rem;color:var(--muted);align-self:center">Roll 1d10+2 and heal</span>
-        </div>
-      </div>
+    <div class="ds-row" id="dsRow" style="display:none">
+      <div class="ds-g s"><div class="ds-lbl">Successes</div><div class="ds-pips"><div class="ds-pip" onclick="tds(this,'sf')"></div><div class="ds-pip" onclick="tds(this,'sf')"></div><div class="ds-pip" onclick="tds(this,'sf')"></div></div></div>
+      <div class="ds-g f"><div class="ds-lbl">Failures</div><div class="ds-pips"><div class="ds-pip" onclick="tds(this,'ff')"></div><div class="ds-pip" onclick="tds(this,'ff')"></div><div class="ds-pip" onclick="tds(this,'ff')"></div></div></div>
     </div>
-
-    <!-- ABILITY SCORES -->
-    <div class="card">
-      <div class="ch">📊 Ability Scores</div>
-      <div class="cb">
-        <div class="ab-grid">
-          <div class="ab-box"><div class="ab-name">STR</div><div class="ab-score">10</div><div class="ab-mod">+0</div></div>
-          <div class="ab-box"><div class="ab-name">DEX</div><div class="ab-score">20</div><div class="ab-mod">+5</div></div>
-          <div class="ab-box"><div class="ab-name">CON</div><div class="ab-score">14</div><div class="ab-score" style="font-size:1rem"></div><div class="ab-mod">+2</div></div>
-          <div class="ab-box"><div class="ab-name">INT</div><div class="ab-score">14</div><div class="ab-mod">+2</div></div>
-          <div class="ab-box"><div class="ab-name">WIS</div><div class="ab-score">12</div><div class="ab-mod">+1</div></div>
-          <div class="ab-box"><div class="ab-name">CHA</div><div class="ab-score">14</div><div class="ab-mod">+2</div></div>
-        </div>
-        <div class="divider"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.75rem">
-          <div><span style="color:var(--muted)">STR Save</span> <strong>+5</strong></div>
-          <div><span style="color:var(--muted)">DEX Save</span> <strong>+10</strong></div>
-          <div><span style="color:var(--muted)">CON Save</span> <strong>+7</strong></div>
-          <div><span style="color:var(--muted)">INT Save</span>  <strong>+3</strong></div>
-          <div><span style="color:var(--muted)">WIS Save</span> <strong>+2</strong></div>
-          <div><span style="color:var(--muted)">CHA Save</span> <strong>+3</strong></div>
-        </div>
-        <div style="margin-top:6px;font-size:0.7rem;color:var(--muted)">+1 bonus to all saves (Resilient)</div>
-      </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div class="card">
-      <div class="ch">🎯 Skills</div>
-      <div class="cb">
-        <div class="skill-2col">
-          <div class="sk"><div class="sk-dot p"></div><div class="sk-name">Acrobatics</div><div class="sk-mod">+9</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Animal Hdlg</div><div class="sk-mod">+1</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Arcana</div><div class="sk-mod">+2</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Athletics</div><div class="sk-mod">+0</div></div>
-          <div class="sk"><div class="sk-dot p"></div><div class="sk-name">Deception</div><div class="sk-mod">+6</div></div>
-          <div class="sk"><div class="sk-dot p"></div><div class="sk-name">History</div><div class="sk-mod">+6</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Insight</div><div class="sk-mod">+1</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Intimidation</div><div class="sk-mod">+2</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Investigation</div><div class="sk-mod">+2</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Medicine</div><div class="sk-mod">+1</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Nature</div><div class="sk-mod">+2</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Perception</div><div class="sk-mod">+1</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Performance</div><div class="sk-mod">+2</div></div>
-          <div class="sk"><div class="sk-dot p"></div><div class="sk-name">Persuasion</div><div class="sk-mod">+6</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Religion</div><div class="sk-mod">+2</div></div>
-          <div class="sk"><div class="sk-dot p"></div><div class="sk-name">Sleight of Hand</div><div class="sk-mod">+9</div></div>
-          <div class="sk"><div class="sk-dot p"></div><div class="sk-name">Stealth</div><div class="sk-mod">+9</div></div>
-          <div class="sk"><div class="sk-dot"></div><div class="sk-name">Survival</div><div class="sk-mod">+1</div></div>
-        </div>
-      </div>
-    </div>
-
   </div>
+</div>
 
-  <!-- ══════════ CENTER PANEL ══════════ -->
-  <div>
-
-    <!-- TACTICAL ADVISOR -->
-    <div class="advisor-wrap" id="advisorWrap">
-      <div class="advisor-header">
-        <div class="advisor-title">⚡ Tactical Advisor</div>
-        <div class="advisor-phase" id="combatPhase">COMBAT READY</div>
+<div class="card">
+  <div class="ch">🔋 Resources</div>
+  <div class="cb">
+    <div style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <div><div class="res-name">Superiority Dice <span class="tag tsr">Short Rest</span></div><div class="res-sub">d10 · DC 17 · 1 maneuver per attack max</div></div>
+        <div class="mono" style="font-size:.8rem;color:var(--purple)"><span id="sdNum">5</span>/5</div>
       </div>
-      <div class="advice-cards" id="adviceCards">
-        <div class="no-advice">Update your HP and resources to get tactical recommendations.</div>
-      </div>
+      <div class="sd-pips" id="sdPips"></div>
     </div>
-
-    <!-- COMBAT TURN -->
-    <div class="card">
-      <div class="ch">⚡ Combat Turn</div>
-      <div class="cb">
-        <div class="turn-grid">
-          <div class="turn-slot ts-action" id="ts-action" onclick="spendSlot('ts-action')">
-            <div class="ts-icon">⚔️</div>
-            <div class="ts-name" style="color:var(--blue)">Action</div>
-            <div class="ts-detail">3 attacks / maneuver</div>
-          </div>
-          <div class="turn-slot ts-bonus" id="ts-bonus" onclick="spendSlot('ts-bonus')">
-            <div class="ts-icon">✨</div>
-            <div class="ts-name" style="color:var(--purple)">Bonus Action</div>
-            <div class="ts-detail">2nd Wind / Rally / Dash</div>
-          </div>
-          <div class="turn-slot ts-react" id="ts-react" onclick="spendSlot('ts-react')">
-            <div class="ts-icon">🛡️</div>
-            <div class="ts-name" style="color:var(--red)">Reaction</div>
-            <div class="ts-detail">Parry / Opp. Attack</div>
-          </div>
-          <div class="turn-slot ts-move" id="ts-move" onclick="spendSlot('ts-move')">
-            <div class="ts-icon">🏃</div>
-            <div class="ts-name" style="color:var(--green)">Movement</div>
-            <div class="ts-detail">30 ft (15 ft if Tactical Shift)</div>
-          </div>
-          <div class="turn-slot ts-move" id="ts-obj" onclick="spendSlot('ts-obj')">
-            <div class="ts-icon">🖐</div>
-            <div class="ts-name" style="color:var(--green)">Free Object</div>
-            <div class="ts-detail">1 interaction</div>
-          </div>
-          <div class="turn-slot ts-move" id="ts-surge" onclick="useSurge()" style="opacity:1">
-            <div class="ts-icon">💥</div>
-            <div class="ts-name" style="color:var(--gold)">Action Surge</div>
-            <div class="ts-detail" id="surgeTurnLabel">Available</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-          <div>
-            <div style="font-size:0.62rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Attacks used (Extra Attack ×3)</div>
-            <div class="attack-track" id="atkPips">
-              <div class="atk-pip" onclick="toggleAtk(this)">1</div>
-              <div class="atk-pip" onclick="toggleAtk(this)">2</div>
-              <div class="atk-pip" onclick="toggleAtk(this)">3</div>
-            </div>
-          </div>
-          <div style="margin-left:auto;display:flex;gap:6px">
-            <button class="btn btn-sr" onclick="newTurn()">New Turn</button>
-            <button class="btn btn-gray" onclick="newRound()">New Round</button>
-          </div>
-        </div>
-      </div>
+    <div class="divider"></div>
+    <div class="res-row"><div><div class="res-name">Second Wind <span class="tag tlr">Long Rest</span></div><div class="res-sub">BA · 1d10+11 HP · unlocks Tactical Shift (15 ft, no OA)</div></div><div class="pips" id="swP"></div></div>
+    <div class="res-row"><div><div class="res-name">Action Surge <span class="tag tsr">Short Rest</span></div><div class="res-sub">Special · Extra action (not Magic action)</div></div><div class="pips" id="asP"></div></div>
+    <div class="res-row"><div><div class="res-name">Indomitable <span class="tag tlr">Long Rest</span></div><div class="res-sub">Special · Reroll failed save with +11 bonus</div></div><div class="pips" id="inP"></div></div>
+    <div class="res-row"><div><div class="res-name">Know Your Enemy <span class="tag tlr">Long Rest</span></div><div class="res-sub">BA · Learn immunities/resists/vulns · Restore: spend 1 SD (no action)</div></div><div class="pips" id="kyP"></div></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn bsr" style="flex:1" onclick="shortRest()">⏱ Short Rest</button>
+      <button class="btn blr" style="flex:1" onclick="longRest()">🌙 Long Rest</button>
     </div>
-
-    <!-- POWER COMBOS -->
-    <div class="card">
-      <div class="ch">💎 Power Combos</div>
-      <div class="cb">
-        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px">These are your strongest play patterns. Click a combo to mark it active this turn.</div>
-        <div class="combos-grid" id="comboGrid">
-
-          <div class="combo-card c-burst" onclick="activateCombo(this,'burst')" id="combo-burst">
-            <div class="combo-avail avail-no" id="avail-burst">Checking...</div>
-            <div class="combo-name">⚡ Maximum Burst</div>
-            <div class="combo-cost">Needs: Action Surge + 1+ SD</div>
-            <div class="combo-steps">
-              <strong>1.</strong> Action: Attack ×3 (Rapier +10)<br>
-              <strong>2.</strong> Action Surge: Attack ×3 more<br>
-              <strong>3.</strong> Use Lunging Attack SD on best hit<br>
-              <strong>4.</strong> Each Rapier hit → Vex advantage
-            </div>
-            <div class="combo-dmg">~6d8+36 + 1d10 · 6 attacks</div>
-          </div>
-
-          <div class="combo-card c-viper" onclick="activateCombo(this,'viper')" id="combo-viper">
-            <div class="combo-avail avail-no" id="avail-viper">Checking...</div>
-            <div class="combo-name">🐍 The Viper</div>
-            <div class="combo-cost">Needs: Poison applied + Pistol ammo</div>
-            <div class="combo-steps">
-              <strong>BA:</strong> Apply poison (if not pre-applied)<br>
-              <strong>1.</strong> Pistol ×3 (Vex chain, each with Adv after first hit)<br>
-              <strong>2.</strong> Each hit: DC 17 Con or 2d8 Poison + Poisoned<br>
-              <strong>3.</strong> Poisoned = Disadv on attacks vs. you
-            </div>
-            <div class="combo-dmg">~3d10+15 + up to 6d8 poison</div>
-          </div>
-
-          <div class="combo-card c-ghost" onclick="activateCombo(this,'ghost')" id="combo-ghost">
-            <div class="combo-avail avail-no" id="avail-ghost">Checking...</div>
-            <div class="combo-name">👻 Ghost Strike</div>
-            <div class="combo-cost">Needs: 1 SD (pre-combat)</div>
-            <div class="combo-steps">
-              <strong>Pre:</strong> Ambush → spend SD on Stealth/Initiative<br>
-              <strong>1.</strong> If surprise: Attack from stealth w/ Adv<br>
-              <strong>2.</strong> Rapier hit → Vex → next attack has Adv<br>
-              <strong>3.</strong> Dagger Nick: free extra attack in Action
-            </div>
-            <div class="combo-dmg">Guaranteed initiative edge + Adv opener</div>
-          </div>
-
-          <div class="combo-card c-iron" onclick="activateCombo(this,'iron')" id="combo-iron">
-            <div class="combo-avail avail-no" id="avail-iron">Checking...</div>
-            <div class="combo-name">🛡 Iron Survival</div>
-            <div class="combo-cost">Needs: Second Wind + 1 SD</div>
-            <div class="combo-steps">
-              <strong>Reaction:</strong> Parry (reduce damage by 1d10+5)<br>
-              <strong>BA:</strong> Second Wind (1d10+11 HP)<br>
-              <strong>+Bonus:</strong> Tactical Shift → reposition 15 ft safely<br>
-              <strong>Or:</strong> Indomitable to reroll a bad save (+11)
-            </div>
-            <div class="combo-dmg">Mitigation + up to 21 HP recovered</div>
-          </div>
-
-          <div class="combo-card c-control" onclick="activateCombo(this,'control')" id="combo-control">
-            <div class="combo-avail avail-no" id="avail-control">Checking...</div>
-            <div class="combo-name">🔮 Total Control</div>
-            <div class="combo-cost">Needs: 2+ SD</div>
-            <div class="combo-steps">
-              <strong>1.</strong> Tac. Master: Sap → enemy Disadv on next attack<br>
-              <strong>2.</strong> Disarming Attack (DEX DC 17) → drop weapon<br>
-              <strong>3.</strong> Rally BA → give ally SD+2 Temp HP<br>
-              <strong>4.</strong> Know Your Enemy → scout resistances
-            </div>
-            <div class="combo-dmg">Lockdown + ally support turn</div>
-          </div>
-
-          <div class="combo-card c-read" onclick="activateCombo(this,'read')" id="combo-read">
-            <div class="combo-avail avail-no" id="avail-read">Checking...</div>
-            <div class="combo-name">🔍 Read the Room</div>
-            <div class="combo-cost">Needs: Know Your Enemy</div>
-            <div class="combo-steps">
-              <strong>BA:</strong> Know Your Enemy → immunities/resists<br>
-              <strong>Key:</strong> Potent Poison ignores Poison Resistance<br>
-              <strong>Key:</strong> Switch to Dagger for Nick if close-range<br>
-              <strong>Key:</strong> Gunner = shoot in melee, no Disadv indoors
-            </div>
-            <div class="combo-dmg">Use intel to maximize damage type</div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- MANEUVERS -->
-    <div class="card">
-      <div class="ch">🎯 Battle Master Maneuvers</div>
-      <div class="cb" style="padding-top:8px">
-        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px">Click to spend 1 Superiority Die. Click again to undo. DC 17 (DEX) for saves.</div>
-        <div class="man-list" id="manList">
-
-          <div class="man" onclick="useManeuver(this,'Ambush')">
-            <div class="man-info">
-              <div class="man-name">Ambush</div>
-              <span class="timing t-special">Special</span>
-              <div class="man-desc">On a Stealth check or Initiative roll, add <strong>+1d10</strong> to the result. Can't be Incapacitated.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Commanding Presence')">
-            <div class="man-info">
-              <div class="man-name">Commanding Presence</div>
-              <span class="timing t-special">Special (Cha check)</span>
-              <div class="man-desc">On an Intimidation, Performance, or Persuasion check, add <strong>+1d10</strong>.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Disarming Attack (DEX)')">
-            <div class="man-info">
-              <div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:0.8rem">DEX save</span></div>
-              <span class="timing t-action">Action (on hit)</span>
-              <div class="man-desc">+1d10 damage. Target makes <strong>DEX save DC 17</strong> or drops a held object (lands in its space).</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Disarming Attack (STR)')">
-            <div class="man-info">
-              <div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:0.8rem">STR save</span></div>
-              <span class="timing t-action">Action (on hit)</span>
-              <div class="man-desc">+1d10 damage. Target makes <strong>STR save DC 17</strong> or drops a held object.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Lunging Attack')">
-            <div class="man-info">
-              <div class="man-name">Lunging Attack</div>
-              <span class="timing t-action">Action (on hit)</span>
-              <div class="man-desc">Move ≥5 ft in a straight line before the hit → add <strong>+1d10 damage</strong>. Great opener from Stealth.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Lunging Dash')">
-            <div class="man-info">
-              <div class="man-name">Lunging Dash</div>
-              <span class="timing t-bonus">Bonus Action</span>
-              <div class="man-desc">Spend 1 SD and take the <strong>Dash action</strong> as your Bonus Action. Close distance without burning your Action.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Parry (DEX +5)')">
-            <div class="man-info">
-              <div class="man-name">Parry <span style="color:var(--muted)">DEX</span></div>
-              <span class="timing t-react">Reaction (when hit by melee)</span>
-              <div class="man-desc">Reduce incoming damage by <strong>1d10 + 5</strong>. Your best defensive option — save Reaction for this.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Parry (STR +0)')">
-            <div class="man-info">
-              <div class="man-name">Parry <span style="color:var(--muted)">STR</span></div>
-              <span class="timing t-react">Reaction (when hit by melee)</span>
-              <div class="man-desc">Reduce incoming damage by <strong>1d10 + 0</strong>. Use DEX Parry instead when possible.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Rally')">
-            <div class="man-info">
-              <div class="man-name">Rally</div>
-              <span class="timing t-bonus">Bonus Action</span>
-              <div class="man-desc">Give an ally within 30 ft <strong>1d10 + 2 Temp HP</strong>. They must see/hear you. Great when ally is near death.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Tactical Assessment')">
-            <div class="man-info">
-              <div class="man-name">Tactical Assessment</div>
-              <span class="timing t-special">Special (INT/WIS check)</span>
-              <div class="man-desc">On a History, Investigation, or Insight check, add <strong>+1d10</strong> to the roll.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Tac. Master: Push')">
-            <div class="man-info">
-              <div class="man-name">Tactical Master: Push</div>
-              <span class="timing t-action">Action (replace mastery)</span>
-              <div class="man-desc">Replace weapon mastery with <strong>Push</strong> on this attack (knocks target back 10 ft). Spend 1 SD.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Tac. Master: Sap')">
-            <div class="man-info">
-              <div class="man-name">Tactical Master: Sap</div>
-              <span class="timing t-action">Action (replace mastery)</span>
-              <div class="man-desc">Target has <strong>Disadvantage on its next attack</strong> before the start of your next turn. Spend 1 SD.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-          <div class="man" onclick="useManeuver(this,'Tac. Master: Slow')">
-            <div class="man-info">
-              <div class="man-name">Tactical Master: Slow</div>
-              <span class="timing t-action">Action (replace mastery)</span>
-              <div class="man-desc">Target's speed is <strong>reduced by 10 ft</strong> until start of your next turn. Spend 1 SD.</div>
-            </div>
-            <div class="man-cost">1 SD</div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ENCOUNTER LOG -->
-    <div class="card">
-      <div class="ch">📋 Encounter Log</div>
-      <div class="cb">
-        <div class="log-area" id="logArea"></div>
-        <div style="display:flex;gap:6px;margin-top:6px">
-          <input type="text" id="logNote" placeholder="Add note…" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:5px 8px;font-size:0.78rem">
-          <button class="btn btn-gray" onclick="addNote()">Add</button>
-          <button class="btn btn-gray log-clear" onclick="clearLog()">Clear</button>
-        </div>
-      </div>
-    </div>
-
   </div>
+</div>
 
-  <!-- ══════════ RIGHT PANEL ══════════ -->
-  <div class="right-panel">
+<div class="card">
+  <div class="ch coll-toggle" onclick="toggleColl('hd-body',this)">🎲 Hit Dice — 11d10 <span class="coll-arrow">▾</span></div>
+  <div class="cb coll-body open" id="hd-body">
+    <div class="sd-pips" id="hdPips" style="flex-wrap:wrap;gap:5px"></div>
+    <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+      <button class="btn bgray" onclick="useHD()">Use 1 HD</button>
+      <span style="font-size:.7rem;color:var(--muted)">Roll 1d10+2, then heal</span>
+    </div>
+  </div>
+</div>
 
-    <!-- ENEMY TRACKER -->
-    <div class="card">
-      <div class="ch">👁 Enemy Tracker</div>
-      <div class="cb">
+<div class="card">
+  <div class="ch">📊 Ability Scores</div>
+  <div class="cb">
+    <div class="ab-grid">
+      <div class="ab-box"><div class="ab-name">STR</div><div class="ab-score">10</div><div class="ab-mod">+0</div></div>
+      <div class="ab-box"><div class="ab-name">DEX</div><div class="ab-score">20</div><div class="ab-mod">+5</div></div>
+      <div class="ab-box"><div class="ab-name">CON</div><div class="ab-score">14</div><div class="ab-mod">+2</div></div>
+      <div class="ab-box"><div class="ab-name">INT</div><div class="ab-score">14</div><div class="ab-mod">+2</div></div>
+      <div class="ab-box"><div class="ab-name">WIS</div><div class="ab-score">12</div><div class="ab-mod">+1</div></div>
+      <div class="ab-box"><div class="ab-name">CHA</div><div class="ab-score">14</div><div class="ab-mod">+2</div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:.75rem;font-family:'Roboto Mono',monospace">
+      <div><span style="color:var(--muted)">STR </span><strong>+5</strong></div><div><span style="color:var(--muted)">DEX </span><strong>+10</strong></div>
+      <div><span style="color:var(--muted)">CON </span><strong>+7</strong></div><div><span style="color:var(--muted)">INT </span><strong>+3</strong></div>
+      <div><span style="color:var(--muted)">WIS </span><strong>+2</strong></div><div><span style="color:var(--muted)">CHA </span><strong>+3</strong></div>
+    </div>
+    <div style="margin-top:5px;font-size:.67rem;color:var(--muted)">All saves get +1 bonus (Resilient)</div>
+  </div>
+</div>
 
-        <div class="enemy-slot" id="enemy1">
-          <div class="enemy-header">
-            <input class="enemy-name" type="text" placeholder="Enemy 1 name…">
-            <button class="btn btn-gray" style="font-size:0.65rem;padding:3px 7px" onclick="clearEnemy(this.closest('.enemy-slot'))">✕</button>
-          </div>
-          <div class="enemy-hp-row">
-            <div class="lbl">HP</div>
-            <input class="enemy-hp" type="number" placeholder="—" min="0">
-            <div style="font-size:0.7rem;color:var(--muted);margin-left:4px">/ <input class="enemy-hp" type="number" placeholder="max" min="0" style="width:40px"></div>
-          </div>
-          <div class="enemy-cond">
-            <span class="econd vex-active" onclick="this.classList.toggle('vex-active')">Vex ▲</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Prone</span>
-            <span class="econd poison-active" onclick="this.classList.toggle('poison-active')">Poisoned</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Sapped</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Disarmed</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Blinded</span>
-          </div>
+<div class="card">
+  <div class="ch coll-toggle" onclick="toggleColl('skill-body',this)">🎯 Skills <span class="coll-arrow">▾</span></div>
+  <div class="cb coll-body" id="skill-body">
+    <div class="skill-2col">
+      <div class="sk"><div class="skd p"></div><div class="skn">Acrobatics</div><div class="skm">+9</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Animal Hdlg</div><div class="skm">+1</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Arcana</div><div class="skm">+2</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Athletics</div><div class="skm">+0</div></div>
+      <div class="sk"><div class="skd p"></div><div class="skn">Deception</div><div class="skm">+6</div></div>
+      <div class="sk"><div class="skd p"></div><div class="skn">History</div><div class="skm">+6</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Insight</div><div class="skm">+1</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Intimidation</div><div class="skm">+2</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Investigation</div><div class="skm">+2</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Medicine</div><div class="skm">+1</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Nature</div><div class="skm">+2</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Perception</div><div class="skm">+1</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Performance</div><div class="skm">+2</div></div>
+      <div class="sk"><div class="skd p"></div><div class="skn">Persuasion</div><div class="skm">+6</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Religion</div><div class="skm">+2</div></div>
+      <div class="sk"><div class="skd p"></div><div class="skn">Sleight of Hand</div><div class="skm">+9</div></div>
+      <div class="sk"><div class="skd p"></div><div class="skn">Stealth</div><div class="skm">+9</div></div>
+      <div class="sk"><div class="skd"></div><div class="skn">Survival</div><div class="skm">+1</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end left -->
+
+<!-- ═══ CENTER ═══ -->
+<div>
+
+<!-- ADVISOR -->
+<div class="advisor">
+  <div class="adv-header">
+    <div class="adv-title">⚡ Tactical Advisor</div>
+    <div class="adv-phase" id="advPhase">COMBAT READY</div>
+  </div>
+  <div class="adv-body" id="advBody"></div>
+</div>
+
+<!-- COMBAT TURN -->
+<div class="card">
+  <div class="ch">⚡ Combat Turn</div>
+  <div class="cb">
+    <div class="slots-grid">
+      <div class="slot sa" id="sl-a" onclick="spendSlot('sl-a')"><div class="slot-icon">⚔️</div><div class="slot-name">Action</div><div class="slot-detail">3 attacks · maneuver</div></div>
+      <div class="slot sb" id="sl-b" onclick="spendSlot('sl-b')"><div class="slot-icon">✨</div><div class="slot-name">Bonus Action</div><div class="slot-detail">2nd Wind · Rally · Dash</div></div>
+      <div class="slot sr" id="sl-r" onclick="spendSlot('sl-r')"><div class="slot-icon">🛡️</div><div class="slot-name">Reaction</div><div class="slot-detail">Parry · Opp. Attack</div></div>
+      <div class="slot sm" id="sl-m" onclick="spendSlot('sl-m')"><div class="slot-icon">🏃</div><div class="slot-name">Movement</div><div class="slot-detail">30 ft</div></div>
+      <div class="slot sm" id="sl-o" onclick="spendSlot('sl-o')"><div class="slot-icon">🖐</div><div class="slot-name">Free Object</div><div class="slot-detail">1 interaction</div></div>
+      <div class="slot" id="sl-surge" onclick="useSurge()" style="border-color:rgba(212,160,23,.5);background:rgba(212,160,23,.03)"><div class="slot-icon">💥</div><div class="slot-name" style="color:var(--gold)">Action Surge</div><div class="slot-detail" id="surgeLabel">Available</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;font-family:'Rajdhani',sans-serif">Attacks this action (Extra Attack ×3)</div>
+        <div class="atk-row" id="atkRow">
+          <div class="atkp" onclick="this.classList.toggle('u')">1</div>
+          <div class="atkp" onclick="this.classList.toggle('u')">2</div>
+          <div class="atkp" onclick="this.classList.toggle('u')">3</div>
+          <span style="font-size:.68rem;color:var(--muted);margin-left:4px">+Nick if 2 light weapons</span>
         </div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn bsr" onclick="newTurn()">New Turn</button>
+        <button class="btn bgray" onclick="newRound()">New Round</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <div class="enemy-slot" id="enemy2">
-          <div class="enemy-header">
-            <input class="enemy-name" type="text" placeholder="Enemy 2 name…">
-            <button class="btn btn-gray" style="font-size:0.65rem;padding:3px 7px" onclick="clearEnemy(this.closest('.enemy-slot'))">✕</button>
-          </div>
-          <div class="enemy-hp-row">
-            <div class="lbl">HP</div>
-            <input class="enemy-hp" type="number" placeholder="—" min="0">
-            <div style="font-size:0.7rem;color:var(--muted);margin-left:4px">/ <input class="enemy-hp" type="number" placeholder="max" min="0" style="width:40px"></div>
-          </div>
-          <div class="enemy-cond">
-            <span class="econd vex-active" onclick="this.classList.toggle('vex-active')">Vex ▲</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Prone</span>
-            <span class="econd" onclick="this.classList.toggle('poison-active')">Poisoned</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Sapped</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Disarmed</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Blinded</span>
-          </div>
+<!-- POWER COMBOS -->
+<div class="card">
+  <div class="ch">💎 Power Combos</div>
+  <div class="cb">
+    <div class="combo-grid" id="comboGrid">
+
+      <div class="ccard c-burst" id="cc-burst" onclick="activateCombo(this,'burst')">
+        <div class="ccard-head"><div class="cname">⚡ Maximum Burst</div><div class="cavail no-avail" id="ca-burst">?</div></div>
+        <div class="ccard-body">
+          <div class="csteps"><strong>Needs:</strong> Action Surge + 1+ SD<br><strong>1.</strong> Attack ×3 (Rapier +10, Vex on each hit)<br><strong>2.</strong> Action Surge → Attack ×3 more<br><strong>3.</strong> Lunging Attack SD on best hit (+1d10 dmg)</div>
+          <div class="cdmg">~6d8+36 + 1d10 · 6 attacks</div>
         </div>
+      </div>
 
-        <div class="enemy-slot" id="enemy3">
-          <div class="enemy-header">
-            <input class="enemy-name" type="text" placeholder="Enemy 3 name…">
-            <button class="btn btn-gray" style="font-size:0.65rem;padding:3px 7px" onclick="clearEnemy(this.closest('.enemy-slot'))">✕</button>
-          </div>
-          <div class="enemy-hp-row">
-            <div class="lbl">HP</div>
-            <input class="enemy-hp" type="number" placeholder="—" min="0">
-            <div style="font-size:0.7rem;color:var(--muted);margin-left:4px">/ <input class="enemy-hp" type="number" placeholder="max" min="0" style="width:40px"></div>
-          </div>
-          <div class="enemy-cond">
-            <span class="econd vex-active" onclick="this.classList.toggle('vex-active')">Vex ▲</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Prone</span>
-            <span class="econd" onclick="this.classList.toggle('poison-active')">Poisoned</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Sapped</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Disarmed</span>
-            <span class="econd" onclick="this.classList.toggle('active')">Blinded</span>
-          </div>
+      <div class="ccard c-viper" id="cc-viper" onclick="activateCombo(this,'viper')">
+        <div class="ccard-head"><div class="cname">🐍 The Viper</div><div class="cavail no-avail" id="ca-viper">?</div></div>
+        <div class="ccard-body">
+          <div class="csteps"><strong>Needs:</strong> Poison applied + Pistol ammo<br><strong>BA:</strong> Apply poison (if not pre-applied)<br><strong>1.</strong> Pistol ×3 with Vex chain<br><strong>2.</strong> Each hit: DC 17 Con or 2d8 Poison + Poisoned<br><strong>Note:</strong> Potent Poison ignores Resistance</div>
+          <div class="cdmg">~3d10+15 + up to 6d8 poison</div>
         </div>
+      </div>
 
+      <div class="ccard c-ghost" id="cc-ghost" onclick="activateCombo(this,'ghost')">
+        <div class="ccard-head"><div class="cname">👻 Ghost Strike</div><div class="cavail no-avail" id="ca-ghost">?</div></div>
+        <div class="ccard-body">
+          <div class="csteps"><strong>Needs:</strong> 1 SD (pre-combat stealth)<br><strong>Pre:</strong> Ambush → add 1d10 to Stealth/Initiative<br><strong>1.</strong> Rapier from stealth (Adv) → Vex triggers<br><strong>Key:</strong> Vex lasts until end of YOUR NEXT TURN — chain advantage across turns</div>
+          <div class="cdmg">+1d10 initiative · Adv opener · Vex carry</div>
+        </div>
+      </div>
+
+      <div class="ccard c-iron" id="cc-iron" onclick="activateCombo(this,'iron')">
+        <div class="ccard-head"><div class="cname">🛡 Iron Survival</div><div class="cavail no-avail" id="ca-iron">?</div></div>
+        <div class="ccard-body">
+          <div class="csteps"><strong>Needs:</strong> Second Wind + 1 SD<br><strong>Reaction:</strong> Parry (1d10+5 damage reduction)<br><strong>BA:</strong> Second Wind (1d10+11 HP)<br><strong>Bonus:</strong> Tactical Shift → reposition 15 ft (no OA)<br><strong>Or:</strong> Indomitable → reroll bad save +11</div>
+          <div class="cdmg">Reduce dmg by 1d10+5 · Recover up to 21 HP</div>
+        </div>
+      </div>
+
+      <div class="ccard c-control" id="cc-control" onclick="activateCombo(this,'control')">
+        <div class="ccard-head"><div class="cname">🔮 Total Control</div><div class="cavail no-avail" id="ca-control">?</div></div>
+        <div class="ccard-body">
+          <div class="csteps"><strong>Needs:</strong> 2+ SD<br><strong>1.</strong> Tac. Master: Sap → Disadv on enemy's next attack<br><strong>2.</strong> Disarming Attack (STR DC 17) → enemy drops weapon<br><strong>3.</strong> Rally (BA) → ally gets 1d10+5 Temp HP<br><strong>4.</strong> Know Your Enemy → scout before committing</div>
+          <div class="cdmg">Lockdown + ally support</div>
+        </div>
+      </div>
+
+      <div class="ccard c-read" id="cc-read" onclick="activateCombo(this,'read')">
+        <div class="ccard-head"><div class="cname">🔍 Read the Room</div><div class="cavail no-avail" id="ca-read">?</div></div>
+        <div class="ccard-body">
+          <div class="csteps"><strong>Needs:</strong> Know Your Enemy<br><strong>BA:</strong> Learn immunities/resists/vulns (30 ft)<br><strong>Then:</strong> Potent Poison ignores Poison Resistance<br><strong>Then:</strong> Gunner = fire Pistol in melee, no Disadv<br><strong>Then:</strong> Switch weapons to exploit vulnerability</div>
+          <div class="cdmg">Intel → weapon/damage optimization</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MANEUVERS -->
+<div class="card">
+  <div class="ch">🎯 Battle Master Maneuvers</div>
+  <div class="cb" style="padding-top:8px">
+    <div class="rule-note"><strong>Rule:</strong> You can use only <strong>1 maneuver per attack</strong>. Click a card to spend 1 SD. Click again to refund. DC 17 (8+4 Prof+5 DEX).</div>
+    <div class="man-list" id="manList">
+
+      <div class="man" onclick="useMan(this,'Ambush')">
+        <div class="man-stripe ts"></div>
+        <div class="man-body"><div class="man-name">Ambush</div><span class="timing ts-t">Special</span><div class="man-desc">On a Stealth check or Initiative roll, add <strong>+1d10</strong> to the result. Cannot be used while Incapacitated.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Commanding Presence')">
+        <div class="man-stripe ts"></div>
+        <div class="man-body"><div class="man-name">Commanding Presence</div><span class="timing ts-t">Special (Cha check)</span><div class="man-desc">On an Intimidation, Performance, or Persuasion check, add <strong>+1d10</strong>.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Disarming Attack (STR DC 17)')">
+        <div class="man-stripe ta"></div>
+        <div class="man-body"><div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:.8rem">STR save (standard)</span></div><span class="timing ta-t">Action · on hit</span><div class="man-desc">+1d10 damage. Target makes <strong>STR save DC 17</strong> or drops a held object (lands in its space).</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Disarming Attack (DEX DC 17)')">
+        <div class="man-stripe ta"></div>
+        <div class="man-body"><div class="man-name">Disarming Attack <span style="color:var(--muted);font-size:.8rem">DEX save (variant)</span></div><span class="timing ta-t">Action · on hit</span><div class="man-desc">+1d10 damage. Target makes <strong>DEX save DC 17</strong> or drops a held object. Variant — confirm with DM.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Lunging Attack')">
+        <div class="man-stripe ta"></div>
+        <div class="man-body"><div class="man-name">Lunging Attack</div><span class="timing ta-t">Action · melee only</span><div class="man-desc">Move ≥5 ft straight before a <strong>melee</strong> hit → add <strong>+1d10 damage</strong>. Cannot be used with ranged attacks.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Lunging Dash')">
+        <div class="man-stripe tb"></div>
+        <div class="man-body"><div class="man-name">Lunging Dash</div><span class="timing tb-t">Bonus Action</span><div class="man-desc">Spend 1 SD and take the <strong>Dash action</strong> as your Bonus Action. Close distance without sacrificing your Action.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Parry (DEX +5)')">
+        <div class="man-stripe tr"></div>
+        <div class="man-body"><div class="man-name">Parry <span style="color:var(--muted)">DEX (+5)</span></div><span class="timing tr-t">Reaction · when damaged by melee</span><div class="man-desc">When a creature <strong>damages you with a melee attack</strong>, reduce the damage by <strong>1d10+5</strong>. Triggers on damage, not just hit — you see the roll first.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Parry (STR +0)')">
+        <div class="man-stripe tr"></div>
+        <div class="man-body"><div class="man-name">Parry <span style="color:var(--muted)">STR (+0)</span></div><span class="timing tr-t">Reaction · when damaged by melee</span><div class="man-desc">Reduce melee damage by <strong>1d10+0</strong>. Use DEX version instead — you have +5 DEX vs +0 STR.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Rally')">
+        <div class="man-stripe tb"></div>
+        <div class="man-body"><div class="man-name">Rally</div><span class="timing tb-t">Bonus Action</span><div class="man-desc">Ally within 30 ft who can see/hear you gains <strong>1d10+5 Temp HP</strong>. Great when an ally is close to dropping.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Tactical Assessment')">
+        <div class="man-stripe ts"></div>
+        <div class="man-body"><div class="man-name">Tactical Assessment</div><span class="timing ts-t">Special (INT/WIS check)</span><div class="man-desc">On a History, Investigation, or Insight check, add <strong>+1d10</strong> to the roll.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Tac. Master: Push')">
+        <div class="man-stripe ta"></div>
+        <div class="man-body"><div class="man-name">Tactical Master: Push</div><span class="timing ta-t">Action · replace mastery</span><div class="man-desc">Replace weapon mastery property with <strong>Push</strong> (knock target 10 ft) on this attack. Spend 1 SD.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Tac. Master: Sap')">
+        <div class="man-stripe ta"></div>
+        <div class="man-body"><div class="man-name">Tactical Master: Sap</div><span class="timing ta-t">Action · replace mastery</span><div class="man-desc">Target has <strong>Disadvantage on its next attack roll</strong> before start of your next turn. Spend 1 SD.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+      <div class="man" onclick="useMan(this,'Tac. Master: Slow')">
+        <div class="man-stripe ta"></div>
+        <div class="man-body"><div class="man-name">Tactical Master: Slow</div><span class="timing ta-t">Action · replace mastery</span><div class="man-desc">Target's speed <strong>reduced by 10 ft</strong> until start of your next turn. Spend 1 SD.</div></div>
+        <div class="man-cost">1 SD</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ENCOUNTER LOG -->
+<div class="card">
+  <div class="ch">📋 Encounter Log</div>
+  <div class="cb">
+    <div class="log-area" id="logArea"></div>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <input type="text" id="logNote" placeholder="Add note…" style="flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:5px 8px;font-size:.75rem;font-family:'Inter',sans-serif">
+      <button class="btn bgray" onclick="addNote()">Add</button>
+      <button class="btn bgray" onclick="clearLog()">Clear</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end center -->
+
+<!-- ═══ RIGHT ═══ -->
+<div class="rpanel">
+
+<!-- ENEMY TRACKER -->
+<div class="card">
+  <div class="ch">👁 Enemy Tracker</div>
+  <div class="cb">
+
+    <div class="enemy-slot">
+      <div class="e-label">TANGO 01 <button class="btn bgray" style="font-size:.58rem;padding:2px 6px" onclick="clearEnemy(this.closest('.enemy-slot'))">CLEAR</button></div>
+      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…"><input class="ehp" type="number" placeholder="HP" min="0"></div>
+      <div class="econd-row">
+        <span class="ec vex" onclick="this.classList.toggle('vex')">Vex ▲</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
+        <span class="ec poison" onclick="this.classList.toggle('poison')">Poisoned</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Sapped</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Disarmed</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>
     </div>
 
-    <!-- WEAPONS -->
-    <div class="card">
-      <div class="ch">🔫 Weapons</div>
-      <div class="cb">
-        <div class="weapon-row">
-          <div class="w-main">
-            <div class="w-name">Rapier +1</div>
-            <div class="w-props"><span class="mastery-tag mt-vex">VEX</span> Martial · Finesse · Melee</div>
-            <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">Hit → Adv on next attack vs same target</div>
-          </div>
-          <div class="w-stat"><div class="w-hit">+10</div><div class="w-dmg">1d8+6 P</div></div>
-        </div>
-        <div class="weapon-row">
-          <div class="w-main">
-            <div class="w-name">Pistol <span style="font-size:0.7rem;color:var(--muted)">(Gunner: no disadv in melee)</span></div>
-            <div class="w-props"><span class="mastery-tag mt-vex">VEX</span> Martial · Ammunition · Range 30/90</div>
-            <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">Ammo:
-              <span id="pistolAmmo" style="color:var(--gold);font-weight:800">7</span>
-              <button class="ammo-btn" style="width:18px;height:18px;display:inline-flex" onclick="chAmmo('pistolAmmo',-1)">−</button>
-              <button class="ammo-btn" style="width:18px;height:18px;display:inline-flex" onclick="chAmmo('pistolAmmo',1)">+</button>
-            </div>
-          </div>
-          <div class="w-stat"><div class="w-hit">+9</div><div class="w-dmg">1d10+5 P</div></div>
-        </div>
-        <div class="weapon-row">
-          <div class="w-main">
-            <div class="w-name">Dart</div>
-            <div class="w-props"><span class="mastery-tag mt-vex">VEX</span> Simple · Finesse · Thrown · Range 20/60</div>
-            <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">Count:
-              <span id="dartAmmo" style="color:var(--gold);font-weight:800">5</span>
-              <button class="ammo-btn" style="width:18px;height:18px;display:inline-flex" onclick="chAmmo('dartAmmo',-1)">−</button>
-              <button class="ammo-btn" style="width:18px;height:18px;display:inline-flex" onclick="chAmmo('dartAmmo',1)">+</button>
-            </div>
-          </div>
-          <div class="w-stat"><div class="w-hit">+9</div><div class="w-dmg">1d4+5 P</div></div>
-        </div>
-        <div class="weapon-row">
-          <div class="w-main">
-            <div class="w-name">Dagger</div>
-            <div class="w-props"><span class="mastery-tag mt-nick">NICK</span> Simple · Finesse · Light · Thrown</div>
-            <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">Nick: extra attack IN Attack action (not BA). Once/turn.</div>
-          </div>
-          <div class="w-stat"><div class="w-hit">+9</div><div class="w-dmg">1d4+5 P</div></div>
-        </div>
-        <div class="weapon-row">
-          <div class="w-main"><div class="w-name">Unarmed Strike</div></div>
-          <div class="w-stat"><div class="w-hit">+4</div><div class="w-dmg">1 B</div></div>
-        </div>
+    <div class="enemy-slot">
+      <div class="e-label">TANGO 02 <button class="btn bgray" style="font-size:.58rem;padding:2px 6px" onclick="clearEnemy(this.closest('.enemy-slot'))">CLEAR</button></div>
+      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…"><input class="ehp" type="number" placeholder="HP" min="0"></div>
+      <div class="econd-row">
+        <span class="ec vex" onclick="this.classList.toggle('vex')">Vex ▲</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
+        <span class="ec poison" onclick="this.classList.toggle('poison')">Poisoned</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Sapped</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Disarmed</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>
     </div>
 
-    <!-- AMMO & POISON -->
-    <div class="card">
-      <div class="ch">🎒 Ammo & Poison</div>
-      <div class="cb">
-        <div class="ammo-row">
-          <div><div class="ammo-name">Bullets of Slaying</div></div>
-          <div class="ammo-ctrl">
-            <button class="ammo-btn" onclick="chAmmo('slayAmmo',-1)">−</button>
-            <div class="ammo-count" id="slayAmmo">2</div>
-            <button class="ammo-btn" onclick="chAmmo('slayAmmo',1)">+</button>
-          </div>
-        </div>
-        <div class="ammo-row">
-          <div><div class="ammo-name">Firearm Bullets +3</div><div class="ammo-sub">+3 hit & damage</div></div>
-          <div class="ammo-ctrl">
-            <button class="ammo-btn" onclick="chAmmo('p3Ammo',-1)">−</button>
-            <div class="ammo-count" id="p3Ammo">2</div>
-            <button class="ammo-btn" onclick="chAmmo('p3Ammo',1)">+</button>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div class="ammo-row">
-          <div><div class="ammo-name">Poison Doses Brewed</div><div class="ammo-sub">4 per 1 hr + 50 gp</div></div>
-          <div class="ammo-ctrl">
-            <button class="ammo-btn" onclick="chAmmo('brewedDoses',-1)">−</button>
-            <div class="ammo-count" id="brewedDoses">4</div>
-            <button class="ammo-btn" onclick="chAmmo('brewedDoses',1)">+</button>
-          </div>
-        </div>
-        <div class="ammo-row">
-          <div>
-            <div class="ammo-name">☠ Poison Applied to Weapon</div>
-            <div class="ammo-sub">BA · Lasts 1 min · DC 17 Con · 2d8 Poison + Poisoned</div>
-            <div class="ammo-sub">Potent Poison: ignores Poison Resistance</div>
-          </div>
-          <div>
-            <button class="btn btn-gray" id="poisonToggle" onclick="togglePoison()">Inactive</button>
-          </div>
-        </div>
-        <div class="ammo-row">
-          <div>
-            <div class="ammo-name">Poison Rounds Left</div>
-            <div class="ammo-sub">1 min = 10 rounds</div>
-          </div>
-          <div class="ammo-ctrl">
-            <button class="ammo-btn" onclick="chAmmo('poisonRounds',-1)">−</button>
-            <div class="ammo-count" id="poisonRounds">10</div>
-            <button class="ammo-btn" onclick="chAmmo('poisonRounds',1)">+</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FEATURES REFERENCE -->
-    <div class="card">
-      <div class="ch">📖 Key Features</div>
-      <div class="cb">
-
-        <div class="feat-item passive">
-          <div class="feat-name">Extra Attack ×3</div>
-          <div class="feat-desc">Attack action = <strong>3 attacks</strong>. Plus Dagger Nick gives a 4th as part of the Attack action (not BA).</div>
-        </div>
-
-        <div class="feat-item passive">
-          <div class="feat-name">Gunner</div>
-          <div class="feat-desc">Ignore Loading on Pistol. No Disadvantage on ranged attacks within 5 ft of a hostile creature.</div>
-        </div>
-
-        <div class="feat-item passive">
-          <div class="feat-name">Alert (+4 Initiative)</div>
-          <div class="feat-desc"><strong>Initiative Swap:</strong> after rolling, swap your Initiative with one willing ally (not Incapacitated).</div>
-        </div>
-
-        <div class="feat-item passive">
-          <div class="feat-name">Weapon Mastery: Vex</div>
-          <div class="feat-desc">Rapier / Pistol / Dart — on hit: Advantage on next attack roll vs. same target before end of turn.</div>
-        </div>
-
-        <div class="feat-item passive">
-          <div class="feat-name">Weapon Mastery: Nick (Dagger)</div>
-          <div class="feat-desc">The Light property extra attack uses the Attack action (not BA). One extra attack per turn, free.</div>
-        </div>
-
-        <div class="feat-item">
-          <div class="feat-name">Tactical Shift</div>
-          <div class="feat-desc">When Second Wind activates as BA → move up to <strong>15 ft without provoking OAs</strong>.</div>
-        </div>
-
-        <div class="feat-item">
-          <div class="feat-name">Tactical Mind</div>
-          <div class="feat-desc">Fail ability check → spend Second Wind use → add 1d10 to the check. HP not restored if used this way.</div>
-        </div>
-
-        <div class="feat-item lr">
-          <div class="feat-name">Indomitable</div>
-          <div class="feat-desc">Fail saving throw → reroll it, must use new result, but add <strong>+11 bonus</strong> to the reroll.</div>
-        </div>
-
-        <div class="feat-item passive">
-          <div class="feat-name">Poisoner (Potent Poison)</div>
-          <div class="feat-desc">Poison damage rolls <strong>ignore Resistance</strong> to Poison. Apply as BA. DC 17 Con save or 2d8 Poison + Poisoned.</div>
-        </div>
-
-        <div class="feat-item passive">
-          <div class="feat-name">Ritual Link — Veiled</div>
-          <div class="feat-desc"><strong>See Invisibility</strong> (1 hr, Self) · <strong>Nondetection</strong> (8 hrs, Touch, 25 gp material). Both as rituals.</div>
-        </div>
-
+    <div class="enemy-slot">
+      <div class="e-label">TANGO 03 <button class="btn bgray" style="font-size:.58rem;padding:2px 6px" onclick="clearEnemy(this.closest('.enemy-slot'))">CLEAR</button></div>
+      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…"><input class="ehp" type="number" placeholder="HP" min="0"></div>
+      <div class="econd-row">
+        <span class="ec vex" onclick="this.classList.toggle('vex')">Vex ▲</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
+        <span class="ec poison" onclick="this.classList.toggle('poison')">Poisoned</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Sapped</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Disarmed</span>
+        <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>
     </div>
 
   </div>
 </div>
 
-<footer>Sergio De La Torre · Fighter 11 · Battle Master · findlerman09 · Auto-saves every 5s</footer>
+<!-- WEAPONS + AMMO / FEATURES TABS -->
+<div class="card">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('weapons')">Weapons</div>
+    <div class="tab" onclick="showTab('ammo')">Ammo & Poison</div>
+    <div class="tab" onclick="showTab('features')">Features</div>
+  </div>
+
+  <!-- WEAPONS -->
+  <div class="tabp active" id="t-weapons">
+    <div class="rule-note" style="margin-bottom:10px"><strong>Vex:</strong> Hit → advantage on your <strong>next</strong> attack vs. that target, usable until end of <strong>YOUR NEXT TURN</strong>. Carries across turns if your last attack hit. Track on enemy cards above.</div>
+    <div class="weap-row">
+      <div class="winfo"><div class="wname">Rapier +1</div><div class="wprop"><span class="mtag mv">VEX</span> Martial · Finesse · Melee (not Light)</div><div style="font-size:.66rem;color:var(--muted);margin-top:2px">Hit → 1 attack with Adv vs same target (until end of your next turn)</div></div>
+      <div class="wstat"><div class="whit">+10</div><div class="wdmg">1d8+6 P</div></div>
+    </div>
+    <div class="weap-row">
+      <div class="winfo"><div class="wname">Pistol <span style="font-size:.68rem;color:var(--green)">(Gunner: no disadv in melee)</span></div><div class="wprop"><span class="mtag mv">VEX</span> Martial · Ammunition · Range 30/90</div><div style="font-size:.66rem;color:var(--muted);margin-top:2px">Ammo: <span id="pistolA" style="color:var(--gold);font-weight:700">7</span> <button class="abtn" onclick="chA('pistolA',-1)" style="width:17px;height:17px;display:inline-flex">−</button><button class="abtn" onclick="chA('pistolA',1)" style="width:17px;height:17px;display:inline-flex">+</button></div></div>
+      <div class="wstat"><div class="whit">+9</div><div class="wdmg">1d10+5 P</div></div>
+    </div>
+    <div class="weap-row">
+      <div class="winfo"><div class="wname">Dart</div><div class="wprop"><span class="mtag mv">VEX</span> Simple · Finesse · Thrown · Range 20/60</div><div style="font-size:.66rem;color:var(--muted);margin-top:2px">Count: <span id="dartA" style="color:var(--gold);font-weight:700">5</span> <button class="abtn" onclick="chA('dartA',-1)" style="width:17px;height:17px;display:inline-flex">−</button><button class="abtn" onclick="chA('dartA',1)" style="width:17px;height:17px;display:inline-flex">+</button></div></div>
+      <div class="wstat"><div class="whit">+9</div><div class="wdmg">1d4+5 P</div></div>
+    </div>
+    <div class="weap-row">
+      <div class="winfo">
+        <div class="wname">Dagger</div>
+        <div class="wprop"><span class="mtag mn">NICK</span> Simple · Finesse · Light · Thrown · Range 20/60</div>
+        <div style="font-size:.66rem;color:var(--amber);margin-top:2px">⚠ Nick requires a SECOND Light weapon. Rapier is not Light — Nick inactive with Rapier+Dagger. Carry two daggers to unlock 4 attacks per Action.</div>
+      </div>
+      <div class="wstat"><div class="whit">+9</div><div class="wdmg">1d4+5 P</div></div>
+    </div>
+    <div class="weap-row">
+      <div class="winfo"><div class="wname">Unarmed Strike</div></div>
+      <div class="wstat"><div class="whit">+4</div><div class="wdmg">1 B</div></div>
+    </div>
+  </div>
+
+  <!-- AMMO & POISON -->
+  <div class="tabp" id="t-ammo">
+    <div class="ammo-row"><div><div class="ammo-name">Bullets of Slaying</div></div><div class="ammo-ctrl"><button class="abtn" onclick="chA('slayA',-1)">−</button><div class="acount" id="slayA">2</div><button class="abtn" onclick="chA('slayA',1)">+</button></div></div>
+    <div class="ammo-row"><div><div class="ammo-name">Firearm Bullet +3</div><div class="ammo-sub">+3 to hit and damage</div></div><div class="ammo-ctrl"><button class="abtn" onclick="chA('p3A',-1)">−</button><div class="acount" id="p3A">2</div><button class="abtn" onclick="chA('p3A',1)">+</button></div></div>
+    <div class="divider"></div>
+    <div class="ammo-row"><div><div class="ammo-name">Poison Doses (brewed)</div><div class="ammo-sub">4 per 1 hr + 50 gp</div></div><div class="ammo-ctrl"><button class="abtn" onclick="chA('bdA',-1)">−</button><div class="acount" id="bdA">4</div><button class="abtn" onclick="chA('bdA',1)">+</button></div></div>
+    <div class="ammo-row">
+      <div><div class="ammo-name">☠ Poison on Weapon</div><div class="ammo-sub">BA to apply · Lasts 1 min (10 rounds) · DC 17 Con · 2d8 Poison + Poisoned · Ignores Resistance</div></div>
+      <div><button class="btn bgray" id="poisonBtn" onclick="togglePoison()">Inactive</button></div>
+    </div>
+    <div class="ammo-row"><div><div class="ammo-name">Poison Rounds Left</div><div class="ammo-sub">Ticks down each New Turn</div></div><div class="ammo-ctrl"><button class="abtn" onclick="chA('prA',-1)">−</button><div class="acount" id="prA">10</div><button class="abtn" onclick="chA('prA',1)">+</button></div></div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="tabp" id="t-features">
+    <div class="feat passive"><div class="feat-name">Extra Attack ×3</div><div class="feat-desc">Attack action = <strong>3 attacks</strong>. Fighter 11 feature.</div></div>
+    <div class="feat passive"><div class="feat-name">Gunner</div><div class="feat-desc">Ignore Loading on Firearms. No Disadvantage on ranged attacks within 5 ft of a hostile creature.</div></div>
+    <div class="feat passive"><div class="feat-name">Alert (+4 Initiative)</div><div class="feat-desc"><strong>Initiative Swap:</strong> After rolling, swap your Initiative with one willing ally (cannot be Incapacitated).</div></div>
+    <div class="feat passive"><div class="feat-name">Vex (Rapier / Pistol / Dart)</div><div class="feat-desc">On hit: your <strong>next attack roll</strong> vs. that creature has Advantage. Window: until end of <strong>your next turn</strong>. Use it to chain advantage across turns by landing Vex as your last attack.</div></div>
+    <div class="feat passive"><div class="feat-name">Nick (Dagger)</div><div class="feat-desc">The Light property's extra attack becomes part of the Attack action (not BA). <strong>Requires TWO Light weapons.</strong> Rapier is not Light — equip two daggers or dagger+dart to use Nick.</div></div>
+    <div class="feat"><div class="feat-name">Tactical Shift</div><div class="feat-desc">When Second Wind activates <strong>as a Bonus Action</strong>, move up to <strong>15 ft without provoking OAs</strong>. Only applies on the turn you use Second Wind as BA.</div></div>
+    <div class="feat"><div class="feat-name">Tactical Mind</div><div class="feat-desc">Fail ability check → spend a Second Wind use → add 1d10 to check. HP <strong>not</strong> regained if used this way.</div></div>
+    <div class="feat lr"><div class="feat-name">Indomitable (1/Long Rest)</div><div class="feat-desc">Fail saving throw → reroll it with <strong>+11 bonus</strong>. Must use the new result.</div></div>
+    <div class="feat passive"><div class="feat-name">Poisoner — Potent Poison</div><div class="feat-desc">Poison damage rolls ignore <strong>Resistance to Poison</strong>. Apply poison as BA. DC 17 Con save or 2d8 Poison + Poisoned (until end of your next turn).</div></div>
+    <div class="feat passive"><div class="feat-name">Defense Feat</div><div class="feat-desc">+1 AC when wearing armor. Already included in AC 21.</div></div>
+    <div class="feat passive"><div class="feat-name">Resilient (DEX)</div><div class="feat-desc">+1 to DEX. Proficiency in DEX saving throws. Included in saves above.</div></div>
+    <div class="feat passive"><div class="feat-name">Ritual Link — Veiled</div><div class="feat-desc"><strong>See Invisibility</strong> (2nd level, 1A, 1 hr, Self) · <strong>Nondetection</strong> (3rd level, 1A, 8 hrs, Touch, 25 gp material).</div></div>
+  </div>
+
+</div>
+
+</div><!-- end right -->
+</div><!-- end layout -->
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s</footer>
 
 <script>
-// ═══ STATE ═══
-const S = {
-  hp: 98, maxHp: 98,
-  sd: 5, sw: 4, as: 1, ind: 1, kye: 1, hd: 11,
-  poisonActive: false,
-  round: 1, turn: 1,
-};
+const S={hp:98,maxHp:98,sd:5,sw:4,as:1,ind:1,kye:1,hd:11,poisonActive:false,round:1,turn:1};
+let logE=[];
 
-// ═══ INIT ═══
-function init() {
-  renderSD(); renderPips('swPips', S.sw, 4); renderPips('asPips', S.as, 1);
-  renderPips('indPips', S.ind, 1); renderPips('kyePips', S.kye, 1);
-  renderHD(); updateHP(); updateComboAvailability(); runAdvisor();
+function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();runAdvisor();}
+
+// PIPS
+function renderPips(id,cur,max){
+  const el=document.getElementById(id);el.innerHTML='';
+  for(let i=0;i<max;i++){const p=document.createElement('div');p.className='pip'+(i>=cur?' e':'');
+    p.onclick=()=>{const k={swP:'sw',asP:'as',inP:'ind',kyP:'kye'}[id];S[k]=i<cur?i:i+1;renderPips(id,S[k],max);runAdvisor();updateCombos();};el.appendChild(p);}
+}
+function renderSD(){
+  const el=document.getElementById('sdPips');el.innerHTML='';
+  for(let i=0;i<5;i++){const d=document.createElement('div');d.className='sdp'+(i>=S.sd?' e':'');
+    d.innerHTML='<span>d10</span>';d.onclick=()=>{S.sd=i<S.sd?i:i+1;renderSD();document.getElementById('sdNum').textContent=S.sd;runAdvisor();updateCombos();};el.appendChild(d);}
+  document.getElementById('sdNum').textContent=S.sd;
+}
+function renderHD(){
+  const el=document.getElementById('hdPips');el.innerHTML='';
+  for(let i=0;i<11;i++){const d=document.createElement('div');
+    Object.assign(d.style,{width:'26px',height:'26px',borderRadius:'4px',border:'1.5px solid',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.55rem',fontWeight:'700',cursor:'pointer',transition:'all .2s',fontFamily:'Roboto Mono,monospace'});
+    if(i<S.hd){d.style.background='rgba(212,160,23,.15)';d.style.borderColor='var(--gold)';d.style.color='var(--gold)';}
+    else{d.style.background='transparent';d.style.borderColor='#1e2d50';d.style.color='#1e2d50';}
+    d.textContent='d10';d.onclick=()=>{S.hd=i<S.hd?i:i+1;renderHD();};el.appendChild(d);}
 }
 
-// ═══ PIPS ═══
-function renderPips(id, cur, max) {
-  const el = document.getElementById(id);
-  el.innerHTML = '';
-  for (let i = 0; i < max; i++) {
-    const p = document.createElement('div');
-    p.className = 'pip' + (i >= cur ? ' empty' : '');
-    p.onclick = () => { const id2 = id; S[pipKey(id2)] = (i < cur ? i : i+1); renderPips(id2, S[pipKey(id2)], max); runAdvisor(); updateComboAvailability(); };
-    el.appendChild(p);
-  }
+// HP
+function updateHP(){
+  const cur=parseInt(document.getElementById('curHP').value)||0;
+  S.hp=Math.max(0,Math.min(S.maxHp,cur));
+  document.getElementById('curHP').value=S.hp;
+  const pct=S.hp/S.maxHp;
+  // ring
+  const circ=213.6;const offset=circ*(1-pct);
+  const ring=document.getElementById('hpRing');ring.style.strokeDashoffset=offset;
+  const col=pct>0.6?'#10b981':pct>0.3?'#f59e0b':'#ef4444';ring.style.stroke=col;
+  document.getElementById('ringNum').textContent=S.hp;document.getElementById('ringNum').style.color=col;
+  document.getElementById('ringPct').textContent=Math.round(pct*100)+'%';
+  // pulse
+  document.getElementById('ringWrap').className='hp-ring-wrap'+(pct<0.25?' pulse-red':pct<0.5?' pulse-gold':'');
+  document.getElementById('dsRow').style.display=S.hp<=0?'flex':'none';
+  runAdvisor();saveState();
 }
-function pipKey(id) { return {swPips:'sw',asPips:'as',indPips:'ind',kyePips:'kye'}[id] || id; }
+function adjHP(dir){const a=parseInt(document.getElementById('adjV').value)||0;if(!a)return;
+  S.hp=Math.max(0,Math.min(S.maxHp,S.hp+dir*a));document.getElementById('curHP').value=S.hp;
+  addLog(`HP ${dir>0?'+':'-'}${a} → ${S.hp}`);document.getElementById('adjV').value='';updateHP();}
+function tds(el,cls){el.classList.toggle(cls);}
 
-function renderSD() {
-  const el = document.getElementById('sdPips');
-  el.innerHTML = '';
-  for (let i = 0; i < 5; i++) {
-    const p = document.createElement('div');
-    p.className = 'pip sd-pip' + (i >= S.sd ? ' empty' : '');
-    p.textContent = 'd10';
-    p.onclick = () => { S.sd = (i < S.sd ? i : i+1); renderSD(); document.getElementById('sdNum').textContent = S.sd; runAdvisor(); updateComboAvailability(); };
-    el.appendChild(p);
-  }
-  document.getElementById('sdNum').textContent = S.sd;
+// SLOTS
+function spendSlot(id){const el=document.getElementById(id);el.classList.toggle('spent');}
+function useSurge(){if(S.as<=0){toast('Action Surge already spent!');return;}
+  S.as=0;renderPips('asP',0,1);document.getElementById('surgeLabel').textContent='SPENT';
+  document.getElementById('sl-surge').classList.add('spent');addLog('ACTION SURGE used');runAdvisor();updateCombos();toast('⚡ Action Surge! Extra action this turn (not Magic action).');}
+function newTurn(){
+  ['sl-a','sl-b','sl-r','sl-m','sl-o'].forEach(id=>document.getElementById(id).classList.remove('spent'));
+  document.querySelectorAll('.atkp').forEach(p=>p.classList.remove('u'));
+  document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
+  // poison countdown
+  const pr=document.getElementById('prA');const prv=parseInt(pr.textContent)||0;
+  if(S.poisonActive&&prv>0){pr.textContent=prv-1;if(prv-1<=0){S.poisonActive=false;updatePoisonUI();toast('☠ Poison wore off.');}}
+  S.turn++;addLog(`── Turn ${S.turn} ──`);runAdvisor();
 }
+function newRound(){S.round++;S.turn=1;
+  document.querySelectorAll('.ec.vex').forEach(e=>{e.classList.add('vex');});
+  newTurn();addLog(`══ Round ${S.round} ══`);toast(`Round ${S.round}.`);}
 
-function renderHD() {
-  const el = document.getElementById('hdPips');
-  el.innerHTML = '';
-  for (let i = 0; i < 11; i++) {
-    const p = document.createElement('div');
-    p.style.cssText = `width:24px;height:24px;border-radius:4px;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:0.55rem;font-weight:800;cursor:pointer;transition:all 0.2s;`;
-    if (i < S.hd) { p.style.background = 'rgba(245,166,35,0.2)'; p.style.borderColor = 'var(--gold)'; p.style.color = 'var(--gold)'; }
-    else { p.style.background = 'transparent'; p.style.borderColor = '#1e2d50'; p.style.color = '#1e2d50'; }
-    p.textContent = 'd10';
-    p.onclick = () => { S.hd = (i < S.hd ? i : i+1); renderHD(); };
-    el.appendChild(p);
-  }
-}
+// RESTS
+function shortRest(){S.sd=5;S.as=1;renderSD();renderPips('asP',1,1);
+  document.getElementById('surgeLabel').textContent='Available';document.getElementById('sl-surge').classList.remove('spent');
+  document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
+  addLog('⏱ Short Rest — SD (5), Action Surge restored');runAdvisor();updateCombos();toast('Short Rest: SD & Action Surge restored.');}
+function longRest(){S.sd=5;S.sw=4;S.as=1;S.ind=1;S.kye=1;S.hd=11;S.hp=S.maxHp;
+  renderSD();renderPips('swP',4,4);renderPips('asP',1,1);renderPips('inP',1,1);renderPips('kyP',1,1);renderHD();
+  document.getElementById('curHP').value=S.maxHp;document.getElementById('surgeLabel').textContent='Available';
+  document.getElementById('sl-surge').classList.remove('spent');
+  document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
+  document.querySelectorAll('.chip').forEach(c=>c.className='chip');updateHP();
+  addLog('🌙 Long Rest — All resources restored');S.round=1;S.turn=1;runAdvisor();updateCombos();toast('Long Rest: Fully restored!');}
+function useHD(){if(S.hd<=0){toast('No hit dice!');return;}S.hd--;renderHD();
+  const roll=Math.ceil(Math.random()*10)+2;S.hp=Math.min(S.maxHp,S.hp+roll);
+  document.getElementById('curHP').value=S.hp;updateHP();addLog(`Hit Die → ${roll-2}+2=${roll} HP (now ${S.hp})`);toast(`Hit Die: +${roll} HP.`);}
 
-// ═══ HP ═══
-function updateHP() {
-  const cur = parseInt(document.getElementById('curHP').value) || 0;
-  S.hp = Math.max(0, Math.min(S.maxHp, cur));
-  document.getElementById('curHP').value = S.hp;
-  const pct = S.hp / S.maxHp;
-  const bar = document.getElementById('hpBar');
-  bar.style.width = (pct * 100) + '%';
-  if (pct > 0.6) bar.style.background = 'linear-gradient(90deg, #00e676, #69f0ae)';
-  else if (pct > 0.3) bar.style.background = 'linear-gradient(90deg, #ffd54f, #ffab40)';
-  else bar.style.background = 'linear-gradient(90deg, #ff5252, #ff1744)';
-  // pulse when critical
-  const inp = document.getElementById('curHP');
-  inp.style.boxShadow = pct < 0.25 ? 'var(--glow-red)' : (pct < 0.5 ? '0 0 8px rgba(255,213,79,0.3)' : '');
-  document.getElementById('dsWrap').style.display = S.hp <= 0 ? 'flex' : 'none';
-  runAdvisor();
-  saveState();
-}
+// MANEUVERS
+function useMan(el,name){const used=el.classList.contains('used');
+  if(used){el.classList.remove('used');const b=el.querySelector('.man-badge');if(b)b.remove();S.sd=Math.min(5,S.sd+1);renderSD();runAdvisor();updateCombos();return;}
+  if(S.sd<=0){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);toast('No Superiority Dice!');return;}
+  el.classList.add('used');S.sd=Math.max(0,S.sd-1);renderSD();
+  const badge=document.createElement('span');badge.className='man-badge';badge.textContent='SD SPENT';el.querySelector('.man-cost').appendChild(badge);
+  addLog(`Maneuver: ${name} (SD spent, ${S.sd} left)`);runAdvisor();updateCombos();}
 
-function adjHP(dir) {
-  const amt = parseInt(document.getElementById('adjVal').value) || 0;
-  if (!amt) return;
-  S.hp = Math.max(0, Math.min(S.maxHp, S.hp + dir * amt));
-  document.getElementById('curHP').value = S.hp;
-  addLog(`HP ${dir>0?'+':'-'}${amt} → ${S.hp}`);
-  document.getElementById('adjVal').value = '';
-  updateHP();
-}
+// COMBOS
+function activateCombo(el,name){if(el.classList.contains('unavail')){toast('Not enough resources for this combo.');return;}
+  document.querySelectorAll('.ccard').forEach(c=>c.classList.remove('active'));el.classList.toggle('active');
+  if(el.classList.contains('active'))addLog(`Combo: ${el.querySelector('.cname').textContent.trim()}`);}
+function updateCombos(){
+  const checks={burst:S.as>0&&S.sd>0,viper:S.poisonActive,ghost:S.sd>0,iron:S.sw>0&&S.sd>0,control:S.sd>=2,read:S.kye>0};
+  for(const[k,ok]of Object.entries(checks)){
+    const card=document.getElementById('cc-'+k);const av=document.getElementById('ca-'+k);if(!card)continue;
+    card.classList.toggle('unavail',!ok);av.className='cavail '+(ok?'avail':'no-avail');av.textContent=ok?'READY':'Need Resources';}}
 
-function toggleDS(el, cls) { el.classList.toggle(cls); }
+// ADVISOR
+function runAdvisor(){
+  const pct=S.hp/S.maxHp;const sd=S.sd;const adv=[];
+  const phase=document.getElementById('advPhase');
+  if(S.hp<=0)phase.textContent='DOWNED';
+  else if(pct<0.25)phase.textContent='CRITICAL — SURVIVE';
+  else if(pct<0.5)phase.textContent='HURT — PLAY SAFE';
+  else if(S.as>0&&sd>=2)phase.textContent='BURST WINDOW OPEN';
+  else phase.textContent='COMBAT READY';
 
-// ═══ SLOTS ═══
-function spendSlot(id) { document.getElementById(id).classList.toggle('spent'); }
-function toggleAtk(el) { el.classList.toggle('used'); }
+  if(pct>0&&pct<0.25){adv.push({p:'critical',i:'🚨',l:'CRITICAL HP',t:S.sw>0?`At ${S.hp}/${S.maxHp} HP. Use <strong>Second Wind (BA)</strong> now — regain 1d10+11 HP. <strong>Tactical Shift</strong> lets you immediately move 15 ft without provoking Opportunity Attacks.`:`HP critical and Second Wind is spent. Consider <strong>Indomitable</strong> if failing saves. Disengage or Dodge may be your best plays.`});}
 
-function useSurge() {
-  if (S.as <= 0) { toast('Action Surge already spent!'); return; }
-  S.as = 0; renderPips('asPips', 0, 1);
-  document.getElementById('surgeTurnLabel').textContent = 'USED';
-  document.getElementById('ts-surge').style.opacity = '0.3';
-  addLog('ACTION SURGE used — extra full action!');
-  runAdvisor(); updateComboAvailability();
-  toast('⚡ Action Surge! Take an extra action this turn.');
-}
+  if(pct>=0.25&&pct<0.5&&S.sw>0){adv.push({p:'high',i:'💛',l:'USE SECOND WIND',t:`You're at ${Math.round(pct*100)}% HP. Use <strong>Second Wind (BA)</strong> for 1d10+11 HP, then <strong>Tactical Shift</strong> to reposition 15 ft safely — no Opportunity Attacks.`});}
 
-function newTurn() {
-  ['ts-action','ts-bonus','ts-react','ts-move','ts-obj'].forEach(id => document.getElementById(id).classList.remove('spent'));
-  document.querySelectorAll('.atk-pip').forEach(p => p.classList.remove('used'));
-  document.querySelectorAll('.man.used-man').forEach(m => {
-    m.classList.remove('used-man');
-    const b = m.querySelector('.man-used-badge');
-    if (b) b.remove();
-  });
-  // decrement poison rounds
-  const pr = document.getElementById('poisonRounds');
-  const prv = parseInt(pr.textContent) || 0;
-  if (S.poisonActive && prv > 0) {
-    pr.textContent = prv - 1;
-    if (prv - 1 <= 0) { S.poisonActive = false; updatePoisonUI(); toast('☠ Poison expired!'); }
-  }
-  S.turn++;
-  addLog(`── Turn ${S.turn} ──`);
-  runAdvisor();
-}
+  if(S.as>0&&sd>=1&&pct>0.4){adv.push({p:'high',i:'⚡',l:'BURST WINDOW',t:`<strong>Action Surge</strong> available with ${sd} SD. Prime <strong>Maximum Burst</strong> turn: Attack ×3, then Action Surge for 3 more. Add <strong>Lunging Attack</strong> SD on your best melee hit (+1d10 dmg). 6 attacks total.`});}
 
-function newRound() {
-  S.round++;
-  S.turn = 1;
-  document.querySelectorAll('.econd.vex-active').forEach(e => e.classList.remove('vex-active'));
-  newTurn();
-  addLog(`══ Round ${S.round} ══`);
-  toast(`Round ${S.round} begins.`);
+  // Vex chip check
+  const vChip=[...document.querySelectorAll('.chip')].find(c=>c.textContent.includes('Vex Adv'));
+  if(vChip&&vChip.classList.contains('buff')){adv.push({p:'med',i:'🟣',l:'VEX ADVANTAGE ACTIVE',t:`Advantage on your <strong>next attack roll</strong> vs. the Vexed target (window: until end of your next turn). Use it on your highest-damage hit — Rapier +10 for 1d8+6. Advantage = <strong>don't waste it</strong>.`});}
+
+  if(sd===1){adv.push({p:'med',i:'⚠️',l:'LAST SUPERIORITY DIE',t:`Only <strong>1 SD remaining</strong>. Save it for <strong>Parry (DEX)</strong> — reduces melee damage by 1d10+5 as a Reaction. Spend it offensively only if the fight is nearly over.`});}
+  else if(sd===0){adv.push({p:'high',i:'🔴',l:'NO SUPERIORITY DICE',t:`All SD spent. Maneuvers are offline. Focus raw weapon attacks and Vex chains. Take a <strong>Short Rest</strong> ASAP to restore all 5.`});}
+
+  if(!S.poisonActive&&parseInt(document.getElementById('bdA').textContent)>0&&pct>0.4){adv.push({p:'med',i:'☠',l:'POISON AVAILABLE',t:`Poison doses ready. Spend your <strong>Bonus Action to apply</strong>, then each hit forces DC 17 Con save or <strong>2d8 Poison + Poisoned condition</strong>. Potent Poison ignores Resistance. Strong vs. non-immune enemies.`});}
+
+  const reactEl=document.getElementById('sl-r');
+  if(reactEl&&!reactEl.classList.contains('spent')&&sd>0){adv.push({p:'low',i:'🛡',l:'REACTION AVAILABLE',t:`Your Reaction is unused. Reserve it for <strong>Parry (DEX)</strong> — it triggers on damage, so you see the damage roll before deciding. 1d10+5 reduction is significant mitigation.`});}
+
+  if(S.kye>0){adv.push({p:'low',i:'🔍',l:'SCOUT FIRST',t:`<strong>Know Your Enemy</strong> available (BA). Reveal an enemy's immunities, resistances, and vulnerabilities within 30 ft. Critical before committing to poison or specific damage types.`});}
+
+  if(adv.length===0){adv.push({p:'low',i:'✅',l:'OPTIMAL STATE',t:`HP: ${S.hp}/${S.maxHp} · SD: ${sd}/5 · All resources up. Strong position — consider landing a <strong>Vex hit</strong> at the end of this turn to carry Advantage into your next turn's opener.`});}
+
+  const body=document.getElementById('advBody');body.innerHTML='';
+  adv.slice(0,3).forEach(a=>{const d=document.createElement('div');d.className=`advc ${a.p}`;
+    d.innerHTML=`<div class="advc-icon">${a.i}</div><div><div class="advc-label">${a.l}</div><div class="advc-text">${a.t}</div></div>`;body.appendChild(d);});
 }
 
-// ═══ RESTS ═══
-function doShortRest() {
-  S.sd = 5; S.as = 1; renderSD(); renderPips('asPips', 1, 1);
-  document.getElementById('surgeTurnLabel').textContent = 'Available';
-  document.getElementById('ts-surge').style.opacity = '1';
-  clearManeuvers();
-  addLog('⏱ SHORT REST — SD restored (5), Action Surge restored');
-  runAdvisor(); updateComboAvailability();
-  toast('Short Rest complete — Superiority Dice & Action Surge restored.');
+// STATUS CHIPS
+function tc(el){const t=el.dataset.type;if(el.classList.contains(t)){el.className='chip';el.dataset.type=t;}else{el.className='chip '+t;el.dataset.type=t;}runAdvisor();}
+
+// TABS
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabp').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="showTab('${name}')"]`).classList.add('active');
+  document.getElementById('t-'+name).classList.add('active');
 }
 
-function doLongRest() {
-  S.sd = 5; S.sw = 4; S.as = 1; S.ind = 1; S.kye = 1; S.hd = 11; S.hp = S.maxHp;
-  renderSD(); renderPips('swPips',4,4); renderPips('asPips',1,1);
-  renderPips('indPips',1,1); renderPips('kyePips',1,1); renderHD();
-  document.getElementById('curHP').value = S.maxHp;
-  document.getElementById('surgeTurnLabel').textContent = 'Available';
-  document.getElementById('ts-surge').style.opacity = '1';
-  clearManeuvers(); updateHP();
-  document.querySelectorAll('.status-bar .chip').forEach(c => c.className = 'chip');
-  addLog('🌙 LONG REST — All resources restored, HP full');
-  S.round = 1; S.turn = 1;
-  runAdvisor(); updateComboAvailability();
-  toast('Long Rest complete — Fully restored!');
-}
+// COLLAPSIBLE
+function toggleColl(id,header){const body=document.getElementById(id);body.classList.toggle('open');header.classList.toggle('open');}
 
-function useHD() {
-  if (S.hd <= 0) { toast('No hit dice remaining!'); return; }
-  S.hd--; renderHD();
-  const roll = Math.ceil(Math.random()*10) + 2;
-  S.hp = Math.min(S.maxHp, S.hp + roll);
-  document.getElementById('curHP').value = S.hp;
-  updateHP();
-  addLog(`HD used → rolled ${roll-2}+2 = ${roll} HP (now ${S.hp})`);
-  toast(`Hit Die: healed ${roll} HP (rolled ${roll-2}+2).`);
-}
+// AMMO
+function chA(id,d){const el=document.getElementById(id);el.textContent=Math.max(0,parseInt(el.textContent||0)+d);saveState();}
 
-// ═══ MANEUVERS ═══
-function useManeuver(el, name) {
-  const isUsed = el.classList.contains('used-man');
-  if (isUsed) {
-    el.classList.remove('used-man');
-    const b = el.querySelector('.man-used-badge'); if(b) b.remove();
-    S.sd = Math.min(5, S.sd + 1); renderSD();
-    runAdvisor(); updateComboAvailability(); return;
-  }
-  if (S.sd <= 0) {
-    el.style.borderColor='var(--red)'; el.style.background='rgba(255,82,82,0.08)';
-    setTimeout(()=>{el.style.borderColor='';el.style.background='';},700);
-    toast('No Superiority Dice remaining!'); return;
-  }
-  el.classList.add('used-man');
-  S.sd = Math.max(0, S.sd - 1); renderSD();
-  const badge = document.createElement('div');
-  badge.className = 'man-used-badge'; badge.textContent = 'SD Spent';
-  el.appendChild(badge);
-  addLog(`Maneuver: ${name} (SD spent — ${S.sd} remaining)`);
-  runAdvisor(); updateComboAvailability();
-}
+// POISON
+function togglePoison(){S.poisonActive=!S.poisonActive;updatePoisonUI();
+  if(S.poisonActive){const bd=document.getElementById('bdA');bd.textContent=Math.max(0,parseInt(bd.textContent||0)-1);document.getElementById('prA').textContent='10';addLog('☠ Poison applied — 10 rounds');}
+  updateCombos();runAdvisor();saveState();}
+function updatePoisonUI(){const btn=document.getElementById('poisonBtn');
+  btn.textContent=S.poisonActive?'☠ ACTIVE':'Inactive';
+  btn.style.cssText=S.poisonActive?'background:rgba(16,185,129,.2);color:var(--green);border:1px solid rgba(16,185,129,.4)':'';}
 
-function clearManeuvers() {
-  document.querySelectorAll('.man.used-man').forEach(m => {
-    m.classList.remove('used-man');
-    const b = m.querySelector('.man-used-badge'); if(b) b.remove();
-  });
-}
+// ENEMY
+function clearEnemy(slot){slot.querySelectorAll('input').forEach(i=>i.value='');slot.querySelectorAll('.ec').forEach(e=>{e.className='ec';if(e.textContent.includes('Vex'))e.className='ec vex';if(e.textContent.includes('Poison'))e.className='ec poison';});}
 
-// ═══ COMBOS ═══
-function activateCombo(el, name) {
-  if (el.classList.contains('unavailable')) { toast('Resources insufficient for this combo right now.'); return; }
-  document.querySelectorAll('.combo-card').forEach(c => c.classList.remove('active-combo'));
-  el.classList.toggle('active-combo');
-  if (el.classList.contains('active-combo')) {
-    addLog(`Combo activated: ${el.querySelector('.combo-name').textContent.trim()}`);
-  }
-}
+// LOG
+function addLog(msg){const t=new Date();const ts=`${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}`;logE.push({ts,msg});if(logE.length>60)logE.shift();renderLog();saveState();}
+function renderLog(){const a=document.getElementById('logArea');a.innerHTML=logE.map(e=>`<div><span class="le-t">[${e.ts}]</span> <span class="le-a">${e.msg}</span></div>`).join('');a.scrollTop=a.scrollHeight;}
+function addNote(){const i=document.getElementById('logNote');if(i.value.trim()){addLog('📝 '+i.value.trim());i.value='';}}
+function clearLog(){logE=[];renderLog();}
 
-function updateComboAvailability() {
-  const checks = {
-    'burst': S.as > 0 && S.sd > 0,
-    'viper': S.poisonActive,
-    'ghost': S.sd > 0,
-    'iron':  S.sw > 0 && S.sd > 0,
-    'control': S.sd >= 2,
-    'read':  S.kye > 0,
-  };
-  for (const [key, ok] of Object.entries(checks)) {
-    const card = document.getElementById('combo-'+key);
-    const avail = document.getElementById('avail-'+key);
-    if (!card) continue;
-    if (ok) {
-      card.classList.remove('unavailable');
-      avail.className = 'combo-avail avail-yes'; avail.textContent = 'READY';
-    } else {
-      card.classList.add('unavailable');
-      avail.className = 'combo-avail avail-no'; avail.textContent = 'Need Resources';
-    }
-  }
-}
+// TOAST
+function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.style.opacity='0',2600);setTimeout(()=>d.remove(),3100);}
 
-// ═══ TACTICAL ADVISOR ═══
-function runAdvisor() {
-  const hp = S.hp / S.maxHp;
-  const sd = S.sd;
-  const advice = [];
-  const phase = document.getElementById('combatPhase');
+// PERSIST
+function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40)}));}catch(e){}}
+function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)return;const d=JSON.parse(raw);
+  if(d.hp!==undefined){S.hp=d.hp;document.getElementById('curHP').value=d.hp;}
+  ['sd','sw','as','ind','kye','hd','poisonActive','round','turn'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k];});
+  ['pistolA','dartA','slayA','p3A','bdA','prA'].forEach(k=>{if(d[k])document.getElementById(k).textContent=d[k];});
+  if(d.log){logE=d.log;renderLog();}if(S.poisonActive)updatePoisonUI();
+  if(S.as===0){document.getElementById('surgeLabel').textContent='Spent';document.getElementById('sl-surge').classList.add('spent');}
+}catch(e){}}
 
-  // Phase label
-  if (hp <= 0) phase.textContent = 'DOWNED';
-  else if (hp < 0.25) phase.textContent = 'CRITICAL — SURVIVE';
-  else if (hp < 0.5) phase.textContent = 'HURT — PLAY CAREFUL';
-  else if (S.as > 0 && sd >= 2) phase.textContent = 'BURST WINDOW OPEN';
-  else phase.textContent = 'COMBAT READY';
-
-  // ── CRITICAL HP ──
-  if (hp > 0 && hp < 0.25) {
-    advice.push({ priority:'critical', icon:'🚨', label:'CRITICAL HP', text:
-      S.sw > 0
-        ? `You're at ${S.hp}/${S.maxHp} HP. Use <strong>Second Wind (BA)</strong> immediately for 1d10+11 HP. <strong>Tactical Shift</strong> lets you move 15 ft away without provoking OAs.`
-        : `HP is critical and Second Wind is spent. Consider <strong>Indomitable</strong> for save rerolls. Disengage or Dodge may be survival plays.`
-    });
-  }
-
-  // ── SAVE SECOND WIND ──
-  if (hp < 0.5 && hp >= 0.25 && S.sw > 0) {
-    advice.push({ priority:'high', icon:'💛', label:'USE SECOND WIND', text:
-      `You're at ${Math.round(hp*100)}% HP. Spend your <strong>Bonus Action on Second Wind</strong> (1d10+11 HP) and <strong>Tactical Shift</strong> to reposition 15 ft safely.`
-    });
-  }
-
-  // ── BURST WINDOW ──
-  if (S.as > 0 && sd >= 1 && hp > 0.4) {
-    advice.push({ priority:'high', icon:'⚡', label:'BURST WINDOW', text:
-      `<strong>Action Surge</strong> is available with ${sd} SD. This is your <strong>Maximum Burst</strong> turn: 3 attacks → Action Surge → 3 more. Use <strong>Lunging Attack</strong> SD on the highest-damage hit for +1d10.`
-    });
-  }
-
-  // ── VEX REMINDER ──
-  const vexChip = [...document.querySelectorAll('.status-bar .chip')].find(c => c.textContent.includes('Vex Adv'));
-  if (vexChip && vexChip.classList.contains('on-buff')) {
-    advice.push({ priority:'med', icon:'🟣', label:'VEX ADVANTAGE ACTIVE', text:
-      `You have <strong>Advantage on your next attack</strong> vs. the Vexed target. Lead with your highest-damage attack (Rapier +10, 1d8+6) to maximize the hit. Remember: Advantage doesn't stack.`
-    });
-  }
-
-  // ── LOW SD WARNING ──
-  if (sd === 1) {
-    advice.push({ priority:'med', icon:'⚠️', label:'LAST SUPERIORITY DIE', text:
-      `Only <strong>1 SD remaining</strong>. Save it for <strong>Parry (DEX)</strong> if you take a big melee hit — it reduces damage by 1d10+5. Short Rest will restore all 5.`
-    });
-  } else if (sd === 0) {
-    advice.push({ priority:'high', icon:'🔴', label:'NO SUPERIORITY DICE', text:
-      `All SD are spent. Your maneuvers are offline. Prioritize a <strong>Short Rest</strong> when possible. Focus on raw weapon attacks and Vex chain damage.`
-    });
-  }
-
-  // ── POISON OPPORTUNITY ──
-  const poisonChip = [...document.querySelectorAll('.status-bar .chip')].find(c => c.textContent.includes('Poison Applied'));
-  if (!S.poisonActive && parseInt(document.getElementById('brewedDoses').textContent) > 0 && hp > 0.5) {
-    advice.push({ priority:'med', icon:'☠', label:'POISON OPPORTUNITY', text:
-      `You have poison doses available. Use your <strong>Bonus Action to apply poison</strong> before attacking — each hit forces a <strong>DC 17 Con save or 2d8 Poison + Poisoned</strong>. Potent Poison ignores Resistance.`
-    });
-  }
-
-  // ── REACTION REMINDER ──
-  const reactSlot = document.getElementById('ts-react');
-  if (reactSlot && !reactSlot.classList.contains('spent') && sd > 0) {
-    advice.push({ priority:'low', icon:'🛡', label:'REACTION AVAILABLE', text:
-      `Your <strong>Reaction is unused</strong>. Hold it for <strong>Parry (DEX)</strong> if a melee attacker hits you — reduces damage by 1d10+5. Don't waste it on Opportunity Attacks unless the target is fleeing.`
-    });
-  }
-
-  // ── KNOW YOUR ENEMY ──
-  if (S.kye > 0) {
-    advice.push({ priority:'low', icon:'🔍', label:'SCOUT YOUR TARGET', text:
-      `<strong>Know Your Enemy</strong> is available (BA). Learn an enemy's immunities, resistances, and vulnerabilities within 30 ft. Use this intel to switch weapons or decide whether poison is worth applying.`
-    });
-  }
-
-  // ── GOOD SHAPE ──
-  if (advice.length === 0) {
-    advice.push({ priority:'low', icon:'✅', label:'OPTIMAL STATE', text:
-      `HP: ${S.hp}/${S.maxHp} · SD: ${sd}/5 · All core resources available. You're in a strong position — consider opening with <strong>Vex (Rapier)</strong> to chain Advantage, or save Action Surge for when enemies cluster.`
-    });
-  }
-
-  const container = document.getElementById('adviceCards');
-  container.innerHTML = '';
-  advice.slice(0, 3).forEach(a => {
-    const div = document.createElement('div');
-    div.className = `advice-card priority-${a.priority}`;
-    div.innerHTML = `<div class="advice-icon">${a.icon}</div><div class="advice-body"><div class="advice-label">${a.label}</div><div class="advice-text">${a.text}</div></div>`;
-    container.appendChild(div);
-  });
-}
-
-// ═══ AMMO ═══
-function chAmmo(id, d) {
-  const el = document.getElementById(id);
-  el.textContent = Math.max(0, parseInt(el.textContent||0) + d);
-  saveState();
-}
-
-// ═══ POISON ═══
-function togglePoison() {
-  S.poisonActive = !S.poisonActive;
-  updatePoisonUI();
-  const doses = document.getElementById('brewedDoses');
-  if (S.poisonActive) {
-    doses.textContent = Math.max(0, parseInt(doses.textContent||0) - 1);
-    document.getElementById('poisonRounds').textContent = '10';
-    addLog('☠ Poison applied — active for 10 rounds');
-  }
-  updateComboAvailability(); runAdvisor(); saveState();
-}
-
-function updatePoisonUI() {
-  const btn = document.getElementById('poisonToggle');
-  btn.textContent = S.poisonActive ? '☠ ACTIVE' : 'Inactive';
-  btn.style.background = S.poisonActive ? 'rgba(0,200,83,0.3)' : '';
-  btn.style.color = S.poisonActive ? 'var(--green)' : '';
-  btn.style.border = S.poisonActive ? '1px solid var(--green)' : '';
-}
-
-// ═══ STATUS CHIPS ═══
-function toggleChip(el) {
-  const t = el.dataset.type;
-  if (el.classList.contains(t)) { el.className = 'chip'; el.dataset.type = t; }
-  else { el.className = 'chip ' + t; el.dataset.type = t; }
-  runAdvisor();
-}
-
-// ═══ ENEMY ═══
-function clearEnemy(slot) {
-  slot.querySelectorAll('input').forEach(i => i.value = '');
-  slot.querySelectorAll('.econd').forEach(e => e.classList.remove('active','vex-active','poison-active'));
-}
-
-// ═══ LOG ═══
-let logEntries = [];
-function addLog(msg) {
-  const now = new Date();
-  const t = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  logEntries.push({t, msg});
-  renderLog();
-  saveState();
-}
-function renderLog() {
-  const area = document.getElementById('logArea');
-  area.innerHTML = logEntries.map(e =>
-    `<div class="log-entry"><span class="le-time">[${e.t}]</span> <span class="le-action">${e.msg}</span></div>`
-  ).join('');
-  area.scrollTop = area.scrollHeight;
-}
-function addNote() {
-  const inp = document.getElementById('logNote');
-  if (inp.value.trim()) { addLog('📝 ' + inp.value.trim()); inp.value = ''; }
-}
-function clearLog() { logEntries = []; renderLog(); }
-
-// ═══ TOAST ═══
-function toast(msg) {
-  document.querySelectorAll('.toast').forEach(t => t.remove());
-  const div = document.createElement('div');
-  div.className = 'toast'; div.textContent = msg;
-  document.body.appendChild(div);
-  setTimeout(() => div.style.opacity = '0', 2500);
-  setTimeout(() => div.remove(), 3000);
-}
-
-// ═══ PERSIST ═══
-function saveState() {
-  try {
-    localStorage.setItem('sergio2_state', JSON.stringify({
-      hp: S.hp, sd: S.sd, sw: S.sw, as: S.as, ind: S.ind, kye: S.kye, hd: S.hd,
-      poisonActive: S.poisonActive, round: S.round, turn: S.turn,
-      pistolAmmo: document.getElementById('pistolAmmo').textContent,
-      dartAmmo: document.getElementById('dartAmmo').textContent,
-      slayAmmo: document.getElementById('slayAmmo').textContent,
-      p3Ammo: document.getElementById('p3Ammo').textContent,
-      brewedDoses: document.getElementById('brewedDoses').textContent,
-      poisonRounds: document.getElementById('poisonRounds').textContent,
-      log: logEntries.slice(-50),
-    }));
-  } catch(e) {}
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem('sergio2_state');
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    if (d.hp !== undefined) { S.hp = d.hp; document.getElementById('curHP').value = d.hp; }
-    if (d.sd !== undefined) S.sd = d.sd;
-    if (d.sw !== undefined) S.sw = d.sw;
-    if (d.as !== undefined) S.as = d.as;
-    if (d.ind !== undefined) S.ind = d.ind;
-    if (d.kye !== undefined) S.kye = d.kye;
-    if (d.hd !== undefined) S.hd = d.hd;
-    if (d.poisonActive) S.poisonActive = d.poisonActive;
-    if (d.round) S.round = d.round;
-    if (d.turn) S.turn = d.turn;
-    if (d.pistolAmmo) document.getElementById('pistolAmmo').textContent = d.pistolAmmo;
-    if (d.dartAmmo) document.getElementById('dartAmmo').textContent = d.dartAmmo;
-    if (d.slayAmmo) document.getElementById('slayAmmo').textContent = d.slayAmmo;
-    if (d.p3Ammo) document.getElementById('p3Ammo').textContent = d.p3Ammo;
-    if (d.brewedDoses) document.getElementById('brewedDoses').textContent = d.brewedDoses;
-    if (d.poisonRounds) document.getElementById('poisonRounds').textContent = d.poisonRounds;
-    if (d.log) { logEntries = d.log; renderLog(); }
-    if (S.poisonActive) updatePoisonUI();
-    if (S.as === 0) {
-      document.getElementById('surgeTurnLabel').textContent = 'Spent';
-      document.getElementById('ts-surge').style.opacity = '0.3';
-    }
-  } catch(e) {}
-}
-
-setInterval(saveState, 5000);
-document.getElementById('curHP').addEventListener('input', updateHP);
-loadState();
-init();
+setInterval(saveState,5000);
+document.getElementById('curHP').addEventListener('input',updateHP);
+loadState();init();
 </script>
 </body>
 </html>
