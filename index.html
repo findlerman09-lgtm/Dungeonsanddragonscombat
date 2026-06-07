@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sergio De La Torre — Fighter 11</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --card: #0f3460;
+    --accent: #e94560;
+    --accent2: #f5a623;
+    --green: #4caf50;
+    --yellow: #ffc107;
+    --red: #f44336;
+    --blue: #2196f3;
+    --purple: #9c27b0;
+    --text: #e0e0e0;
+    --muted: #888;
+    --border: #2a4a7a;
+    --used: #333;
+    --used-text: #555;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border-bottom: 2px solid var(--accent);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { font-size: 1.6rem; color: #fff; letter-spacing: 1px; }
+  header .subtitle { color: var(--accent2); font-size: 0.9rem; }
+  .header-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+  .stat-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .stat-pill span { color: var(--accent2); font-weight: bold; }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--card);
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-header .icon { font-size: 1rem; }
+  .card-body { padding: 14px; }
+
+  /* HP Section */
+  .hp-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 12px; }
+  .hp-block { flex: 1; }
+  .hp-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .hp-value {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+  }
+  #currentHP { width: 80px; background: #0f3460; border: 2px solid var(--green); border-radius: 8px; color: var(--green); font-size: 1.4rem; font-weight: 700; text-align: center; padding: 6px; }
+  #currentHP:focus { outline: none; border-color: var(--accent2); }
+  #tempHP { width: 60px; background: #0f3460; border: 2px solid var(--blue); border-radius: 8px; color: var(--blue); font-size: 1.2rem; font-weight: 700; text-align: center; padding: 6px; }
+  .hp-bar-wrap { height: 8px; background: #111; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+  .hp-bar { height: 100%; background: linear-gradient(90deg, var(--red), var(--yellow), var(--green)); transition: width 0.3s; border-radius: 4px; }
+  .hp-buttons { display: flex; gap: 6px; margin-top: 8px; }
+  .hp-adj { background: #0f3460; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.85rem; }
+  .hp-adj:hover { background: var(--border); }
+  #hpInput { width: 55px; background: #0f3460; border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; text-align: center; }
+
+  /* Death Saves */
+  .death-saves { display: flex; gap: 16px; margin-top: 10px; }
+  .ds-group { display: flex; flex-direction: column; gap: 4px; }
+  .ds-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+  .ds-label.success { color: var(--green); }
+  .ds-label.failure { color: var(--red); }
+  .ds-pips { display: flex; gap: 6px; }
+  .ds-pip {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .ds-pip.success-filled { background: var(--green); border-color: var(--green); }
+  .ds-pip.failure-filled { background: var(--red); border-color: var(--red); }
+
+  /* Ability Scores */
+  .ability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ability-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+  .ability-name { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .ability-score { font-size: 1.5rem; font-weight: 900; color: #fff; }
+  .ability-mod { font-size: 0.8rem; color: var(--accent2); font-weight: 700; }
+
+  /* Resources */
+  .resource-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .resource-name { font-weight: 600; font-size: 0.9rem; }
+  .resource-sub { font-size: 0.7rem; color: var(--muted); }
+  .pips { display: flex; gap: 5px; }
+  .pip {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--accent2);
+    background: var(--accent2);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: bold;
+  }
+  .pip.used {
+    background: transparent;
+    border-color: #444;
+    color: #444;
+  }
+  .pip:hover { transform: scale(1.15); }
+
+  /* Superiority Dice - larger */
+  .sd-pips .pip {
+    width: 28px; height: 28px;
+    font-size: 0.65rem;
+    border-color: var(--purple);
+    background: var(--purple);
+    color: #fff;
+  }
+  .sd-pips .pip.used { background: transparent; border-color: #444; color: #444; }
+
+  .rest-btn {
+    display: flex; gap: 8px; margin-top: 4px;
+  }
+  .btn {
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  .btn-short { background: var(--yellow); color: #000; }
+  .btn-long { background: var(--accent); color: #fff; }
+  .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+
+  /* Maneuvers */
+  .maneuver-list { display: flex; flex-direction: column; gap: 8px; }
+  .maneuver {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .maneuver:hover { border-color: var(--purple); }
+  .maneuver.tracking {
+    border-color: var(--accent2);
+    background: rgba(245,166,35,0.08);
+  }
+  .maneuver-info { flex: 1; }
+  .maneuver-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; }
+  .maneuver-timing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .timing-action { background: rgba(33,150,243,0.2); color: var(--blue); border: 1px solid var(--blue); }
+  .timing-bonus { background: rgba(156,39,176,0.2); color: #ce93d8; border: 1px solid #9c27b0; }
+  .timing-reaction { background: rgba(244,67,54,0.2); color: #ef9a9a; border: 1px solid var(--red); }
+  .timing-special { background: rgba(76,175,80,0.2); color: #a5d6a7; border: 1px solid var(--green); }
+  .maneuver-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+  .maneuver-cost {
+    font-size: 0.7rem;
+    color: var(--purple);
+    font-weight: 700;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .tracking-badge {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 0.65rem;
+    background: var(--accent2);
+    color: #000;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-weight: 700;
+  }
+
+  /* Weapon section */
+  .weapon-table { width: 100%; border-collapse: collapse; }
+  .weapon-table th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    padding: 4px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .weapon-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: top;
+  }
+  .weapon-table tr:last-child td { border-bottom: none; }
+  .weapon-name { font-weight: 700; }
+  .weapon-hit { color: var(--green); font-weight: 700; font-size: 1rem; }
+  .weapon-dmg { color: var(--accent2); font-weight: 600; }
+  .weapon-prop { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .weapon-mastery-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-right: 3px;
+    font-weight: 700;
+  }
+  .vex-badge { background: rgba(156,39,176,0.3); color: #ce93d8; border: 1px solid #9c27b0; }
+  .nick-badge { background: rgba(33,150,243,0.3); color: #90caf9; border: 1px solid var(--blue); }
+  .sap-badge { background: rgba(255,193,7,0.3); color: var(--yellow); border: 1px solid var(--yellow); }
+
+  /* Vex tracker */
+  .vex-tracker {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(156,39,176,0.1);
+    border: 1px solid #9c27b0;
+    border-radius: 8px;
+  }
+  .vex-tracker h4 { font-size: 0.8rem; color: #ce93d8; margin-bottom: 6px; }
+  .vex-target-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .vex-toggle {
+    width: 18px; height: 18px;
+    border-radius: 3px;
+    border: 2px solid #9c27b0;
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    color: #ce93d8;
+    transition: all 0.2s;
+  }
+  .vex-toggle.active { background: #9c27b0; }
+  .vex-label { font-size: 0.8rem; color: var(--text); }
+
+  /* Action grid for combat turn */
+  .action-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .action-slot {
+    border-radius: 8px;
+    border: 2px solid;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .slot-action { border-color: var(--blue); }
+  .slot-bonus { border-color: var(--purple); }
+  .slot-reaction { border-color: var(--red); }
+  .slot-free { border-color: var(--green); }
+  .action-slot:hover { filter: brightness(1.2); }
+  .action-slot.spent {
+    opacity: 0.35;
+    filter: grayscale(0.8);
+  }
+  .slot-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .slot-name { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+  .slot-detail { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+  .reset-turn-btn { margin-top: 10px; width: 100%; }
+
+  /* Features */
+  .feature-item {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent2);
+  }
+  .feature-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Status indicators */
+  .status-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+  }
+  .status-chip {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+    user-select: none;
+  }
+  .status-chip.inactive { border-color: #444; color: #666; background: transparent; }
+  .status-chip.active-buff { border-color: var(--green); color: var(--green); background: rgba(76,175,80,0.15); }
+  .status-chip.active-debuff { border-color: var(--red); color: var(--red); background: rgba(244,67,54,0.15); }
+  .status-chip.active-neutral { border-color: var(--blue); color: var(--blue); background: rgba(33,150,243,0.15); }
+
+  /* Ammunition */
+  .ammo-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .ammo-row:last-child { border-bottom: none; }
+  .ammo-name { font-size: 0.85rem; font-weight: 600; }
+  .ammo-controls { display: flex; align-items: center; gap: 8px; }
+  .ammo-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
+  .ammo-btn:hover { background: var(--border); }
+  .ammo-count { font-size: 1rem; font-weight: 700; min-width: 28px; text-align: center; }
+
+  /* Skills */
+  .skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .skill-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+  .skill-prof { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #444; flex-shrink: 0; }
+  .skill-prof.prof { border-color: var(--accent2); background: var(--accent2); }
+  .skill-prof.exp { border-color: var(--green); background: var(--green); }
+  .skill-name { font-size: 0.78rem; flex: 1; }
+  .skill-mod { font-size: 0.8rem; font-weight: 700; color: var(--accent2); }
+
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+  }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info-item { }
+  .info-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .info-value { font-size: 0.9rem; font-weight: 600; }
+
+  .tooltip-icon {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    color: #aaa;
+    font-size: 0.6rem;
+    text-align: center;
+    line-height: 14px;
+    cursor: help;
+    vertical-align: middle;
+  }
+
+  .poison-tracker {
+    padding: 10px;
+    background: rgba(76,175,80,0.08);
+    border: 1px solid rgba(76,175,80,0.3);
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  .poison-tracker h4 { font-size: 0.8rem; color: var(--green); margin-bottom: 6px; }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #444;
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .badge {
+    display: inline-block; font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle;
+  }
+  .badge-lr { background: rgba(244,67,54,0.2); color: #ef9a9a; border: 1px solid var(--red); }
+  .badge-sr { background: rgba(255,193,7,0.2); color: var(--yellow); border: 1px solid var(--yellow); }
+
+  .extra-attack-tracker {
+    display: flex; gap: 6px; align-items: center; margin-top: 8px;
+  }
+  .attack-pip {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--green);
+    background: var(--green);
+    color: #000;
+    font-weight: 700; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .attack-pip.used { background: transparent; border-color: #444; color: #444; }
+
+  .highlight { color: var(--accent2); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>⚔️ Sergio De La Torre</h1>
+    <div class="subtitle">Fighter 11 · Battle Master · Variant Human · Criminal</div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">AC <span>21</span></div>
+    <div class="stat-pill">Init <span>+9</span></div>
+    <div class="stat-pill">Speed <span>30 ft</span></div>
+    <div class="stat-pill">Prof <span>+4</span></div>
+    <div class="stat-pill">Extra Attacks <span>3×</span></div>
+    <div class="stat-pill">Passive Perc <span>11</span></div>
+  </div>
+</header>
+
+<!-- Status Bar -->
+<div class="status-bar" id="statusBar">
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Vex (Advantage)" data-type="active-buff">Vex ▲</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Parried" data-type="active-buff">Parried</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Rallied (Temp HP)" data-type="active-buff">Rallied</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Prone" data-type="active-debuff">Prone</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Poisoned" data-type="active-debuff">Poisoned</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Incapacitated" data-type="active-debuff">Incapacitated</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Concentrating" data-type="active-neutral">Concentrating</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Second Wind Active" data-type="active-buff">2nd Wind Active</span>
+  <span class="status-chip inactive" onclick="toggleStatus(this)" data-label="Action Surge Used" data-type="active-neutral">Action Surged</span>
+</div>
+
+<main>
+  <!-- LEFT PANEL -->
+  <div class="panel">
+
+    <!-- HP -->
+    <div class="card">
+      <div class="card-header"><span class="icon">❤️</span> Hit Points</div>
+      <div class="card-body">
+        <div class="hp-row">
+          <div class="hp-block">
+            <div class="hp-label">Current HP</div>
+            <input type="number" id="currentHP" value="98" min="0" max="98" oninput="updateHPBar()">
+          </div>
+          <div class="hp-block">
+            <div class="hp-label">Max HP</div>
+            <div class="hp-value">98</div>
+          </div>
+          <div class="hp-block">
+            <div class="hp-label">Temp HP</div>
+            <input type="number" id="tempHP" value="0" min="0" style="width:60px;background:#0f3460;border:2px solid var(--blue);border-radius:8px;color:var(--blue);font-size:1.2rem;font-weight:700;text-align:center;padding:6px;">
+          </div>
+        </div>
+        <div class="hp-bar-wrap"><div class="hp-bar" id="hpBar" style="width:100%"></div></div>
+        <div class="hp-buttons">
+          <input type="number" id="hpInput" placeholder="±HP" value="">
+          <button class="hp-adj btn btn-long" onclick="adjustHP(-1)">Damage</button>
+          <button class="hp-adj btn btn-short" onclick="adjustHP(1)">Heal</button>
+        </div>
+        <div class="death-saves" id="deathSaves" style="display:none">
+          <div class="ds-group">
+            <div class="ds-label success">Successes</div>
+            <div class="ds-pips">
+              <div class="ds-pip" onclick="toggleDS(this,'success')"></div>
+              <div class="ds-pip" onclick="toggleDS(this,'success')"></div>
+              <div class="ds-pip" onclick="toggleDS(this,'success')"></div>
+            </div>
+          </div>
+          <div class="ds-group">
+            <div class="ds-label failure">Failures</div>
+            <div class="ds-pips">
+              <div class="ds-pip" onclick="toggleDS(this,'failure')"></div>
+              <div class="ds-pip" onclick="toggleDS(this,'failure')"></div>
+              <div class="ds-pip" onclick="toggleDS(this,'failure')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hit Dice -->
+    <div class="card">
+      <div class="card-header"><span class="icon">🎲</span> Hit Dice — 11d10</div>
+      <div class="card-body">
+        <div class="pips" id="hitDice" style="flex-wrap:wrap;gap:6px;"></div>
+        <div class="rest-btn" style="margin-top:10px;">
+          <button class="btn btn-short" onclick="restoreHD(1)">Use 1 HD (1d10+2)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ability Scores -->
+    <div class="card">
+      <div class="card-header"><span class="icon">📊</span> Ability Scores</div>
+      <div class="card-body">
+        <div class="ability-grid">
+          <div class="ability-box">
+            <div class="ability-name">STR</div>
+            <div class="ability-score">10</div>
+            <div class="ability-mod">+0</div>
+          </div>
+          <div class="ability-box">
+            <div class="ability-name">DEX</div>
+            <div class="ability-score">20</div>
+            <div class="ability-mod">+5</div>
+          </div>
+          <div class="ability-box">
+            <div class="ability-name">CON</div>
+            <div class="ability-score">14</div>
+            <div class="ability-mod">+2</div>
+          </div>
+          <div class="ability-box">
+            <div class="ability-name">INT</div>
+            <div class="ability-score">14</div>
+            <div class="ability-mod">+2</div>
+          </div>
+          <div class="ability-box">
+            <div class="ability-name">WIS</div>
+            <div class="ability-score">12</div>
+            <div class="ability-mod">+1</div>
+          </div>
+          <div class="ability-box">
+            <div class="ability-name">CHA</div>
+            <div class="ability-score">14</div>
+            <div class="ability-mod">+2</div>
+          </div>
+        </div>
+        <div class="section-divider"></div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Save Bonus</div><div class="info-value">+1 to all saves</div></div>
+          <div class="info-item"><div class="info-label">Maneuver DC</div><div class="info-value">17 (DEX)</div></div>
+          <div class="info-item"><div class="info-label">Indomitable Bonus</div><div class="info-value">+11 reroll</div></div>
+          <div class="info-item"><div class="info-label">Poison Save DC</div><div class="info-value">17</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="card">
+      <div class="card-header"><span class="icon">🎯</span> Skills</div>
+      <div class="card-body">
+        <div class="skill-grid">
+          <div class="skill-row"><div class="skill-prof prof"></div><div class="skill-name">Acrobatics</div><div class="skill-mod">+9</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Animal Handling</div><div class="skill-mod">+1</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Arcana</div><div class="skill-mod">+2</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Athletics</div><div class="skill-mod">+0</div></div>
+          <div class="skill-row"><div class="skill-prof prof"></div><div class="skill-name">Deception</div><div class="skill-mod">+6</div></div>
+          <div class="skill-row"><div class="skill-prof prof"></div><div class="skill-name">History</div><div class="skill-mod">+6</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Insight</div><div class="skill-mod">+1</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Intimidation</div><div class="skill-mod">+2</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Investigation</div><div class="skill-mod">+2</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Medicine</div><div class="skill-mod">+1</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Nature</div><div class="skill-mod">+2</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Perception</div><div class="skill-mod">+1</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Performance</div><div class="skill-mod">+2</div></div>
+          <div class="skill-row"><div class="skill-prof prof"></div><div class="skill-name">Persuasion</div><div class="skill-mod">+6</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Religion</div><div class="skill-mod">+2</div></div>
+          <div class="skill-row"><div class="skill-prof prof"></div><div class="skill-name">Sleight of Hand</div><div class="skill-mod">+9</div></div>
+          <div class="skill-row"><div class="skill-prof prof"></div><div class="skill-name">Stealth</div><div class="skill-mod">+9</div></div>
+          <div class="skill-row"><div class="skill-prof"></div><div class="skill-name">Survival</div><div class="skill-mod">+1</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel">
+
+    <!-- Combat Turn Tracker -->
+    <div class="card">
+      <div class="card-header"><span class="icon">⚡</span> Combat Turn Tracker</div>
+      <div class="card-body">
+        <div class="action-slots">
+          <div class="action-slot slot-action" id="slot-action" onclick="toggleSlot('slot-action')">
+            <div class="slot-icon">⚔️</div>
+            <div class="slot-name" style="color:var(--blue)">Action</div>
+            <div class="slot-detail">3 attacks / maneuver</div>
+          </div>
+          <div class="action-slot slot-bonus" id="slot-bonus" onclick="toggleSlot('slot-bonus')">
+            <div class="slot-icon">✨</div>
+            <div class="slot-name" style="color:#ce93d8">Bonus Action</div>
+            <div class="slot-detail">Second Wind / Rally</div>
+          </div>
+          <div class="action-slot slot-reaction" id="slot-reaction" onclick="toggleSlot('slot-reaction')">
+            <div class="slot-icon">🛡️</div>
+            <div class="slot-name" style="color:#ef9a9a">Reaction</div>
+            <div class="slot-detail">Parry / Opp. Attack</div>
+          </div>
+          <div class="action-slot slot-free" id="slot-movement" onclick="toggleSlot('slot-movement')">
+            <div class="slot-icon">🏃</div>
+            <div class="slot-name" style="color:#a5d6a7">Movement</div>
+            <div class="slot-detail">30 ft</div>
+          </div>
+          <div class="action-slot slot-free" id="slot-object" onclick="toggleSlot('slot-object')">
+            <div class="slot-icon">🖐️</div>
+            <div class="slot-name" style="color:#a5d6a7">Free Object</div>
+            <div class="slot-detail">1 free interaction</div>
+          </div>
+          <div class="action-slot slot-free" id="slot-maneuver" onclick="toggleSlot('slot-maneuver')">
+            <div class="slot-icon">🎲</div>
+            <div class="slot-name" style="color:#a5d6a7">Maneuver</div>
+            <div class="slot-detail">1 per attack</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-short" style="flex:1" onclick="resetTurn()">New Turn</button>
+          <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+            <div style="font-size:0.7rem; color:var(--muted);">Attack uses (turn)</div>
+            <div class="extra-attack-tracker" id="attackTracker">
+              <div class="attack-pip" onclick="toggleAttack(this)">1</div>
+              <div class="attack-pip" onclick="toggleAttack(this)">2</div>
+              <div class="attack-pip" onclick="toggleAttack(this)">3</div>
+              <div style="font-size:0.7rem;color:var(--muted);margin-left:4px;">Extra Attack ×3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Resources -->
+    <div class="card">
+      <div class="card-header"><span class="icon">🔋</span> Core Resources</div>
+      <div class="card-body">
+
+        <!-- Superiority Dice -->
+        <div class="resource-row">
+          <div>
+            <div class="resource-name">Superiority Dice <span class="badge badge-sr">Short Rest</span></div>
+            <div class="resource-sub">d10 · DC 17 · 1 per attack · spend to use maneuvers</div>
+          </div>
+        </div>
+        <div class="pips sd-pips" id="supDice"></div>
+        <div style="margin-top:6px;font-size:0.75rem;color:var(--muted)" id="sdCount">5 / 5 remaining</div>
+
+        <div class="section-divider"></div>
+
+        <!-- Second Wind -->
+        <div class="resource-row">
+          <div>
+            <div class="resource-name">Second Wind <span class="badge badge-lr">Long Rest</span></div>
+            <div class="resource-sub">Bonus Action · Regain 1d10+11 HP · 4 uses · Tactical Shift on activation</div>
+          </div>
+          <div>
+            <div class="pips" id="secondWind"></div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Action Surge -->
+        <div class="resource-row">
+          <div>
+            <div class="resource-name">Action Surge <span class="badge badge-sr">Short Rest</span></div>
+            <div class="resource-sub">Special · Take 1 extra action (not Magic action)</div>
+          </div>
+          <div>
+            <div class="pips" id="actionSurge"></div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Indomitable -->
+        <div class="resource-row">
+          <div>
+            <div class="resource-name">Indomitable <span class="badge badge-lr">Long Rest</span></div>
+            <div class="resource-sub">Special · Reroll failed saving throw with +11 bonus</div>
+          </div>
+          <div>
+            <div class="pips" id="indomitable"></div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Know Your Enemy -->
+        <div class="resource-row">
+          <div>
+            <div class="resource-name">Know Your Enemy <span class="badge badge-lr">Long Rest</span></div>
+            <div class="resource-sub">Bonus Action · Learn immunities/resistances/vulns of creature within 30 ft · Restore 1 use by spending 1 Superiority Die</div>
+          </div>
+          <div>
+            <div class="pips" id="knowEnemy"></div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Rest buttons -->
+        <div class="rest-btn">
+          <button class="btn btn-short" style="flex:1" onclick="shortRest()">⏱ Short Rest</button>
+          <button class="btn btn-long" style="flex:1" onclick="longRest()">🌙 Long Rest</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tabs for Maneuvers / Weapons / Features -->
+    <div class="card">
+      <div class="card-body" style="padding-bottom:0">
+        <div class="tabs">
+          <div class="tab active" onclick="showTab('maneuvers')">⚔️ Maneuvers</div>
+          <div class="tab" onclick="showTab('weapons')">🔫 Weapons</div>
+          <div class="tab" onclick="showTab('features')">📖 Features</div>
+          <div class="tab" onclick="showTab('inventory')">🎒 Inventory</div>
+        </div>
+      </div>
+
+      <!-- Maneuvers Tab -->
+      <div id="tab-maneuvers" class="tab-content active card-body" style="padding-top:0">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;">
+          Click a maneuver card when used to spend a Superiority Die. <span style="color:var(--purple)">Purple = costs SD</span>.
+        </div>
+        <div class="maneuver-list">
+
+          <div class="maneuver" onclick="useManeuver(this,'Ambush')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Ambush</div>
+              <span class="maneuver-timing timing-special">Special (Stealth/Initiative)</span>
+              <div class="maneuver-desc">When you make a Dex (Stealth) check or roll Initiative, expend 1 SD to add the die to the roll (unless Incapacitated).</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Commanding Presence')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Commanding Presence</div>
+              <span class="maneuver-timing timing-special">Special (Cha Check)</span>
+              <div class="maneuver-desc">When you make a Cha (Intimidation, Performance, or Persuasion) check, expend 1 SD and add the die to the roll.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Disarming Attack (DEX)')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Disarming Attack <span style="color:var(--muted);font-size:0.8rem">(DEX save DC 17)</span></div>
+              <span class="maneuver-timing timing-action">Action (on hit)</span>
+              <div class="maneuver-desc">Add SD to damage roll. Target must succeed on a DEX save or drop one object it's holding (lands in its space).</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Disarming Attack (STR)')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Disarming Attack <span style="color:var(--muted);font-size:0.8rem">(STR save DC 17)</span></div>
+              <span class="maneuver-timing timing-action">Action (on hit)</span>
+              <div class="maneuver-desc">Add SD to damage roll. Target must succeed on a STR save or drop one object it's holding.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Lunging Attack')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Lunging Attack</div>
+              <span class="maneuver-timing timing-action">Action (on hit)</span>
+              <div class="maneuver-desc">Move ≥5 ft in a straight line before hitting with a melee attack. Add SD to damage roll.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Lunging Dash')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Lunging Dash</div>
+              <span class="maneuver-timing timing-bonus">Bonus Action</span>
+              <div class="maneuver-desc">Expend 1 SD and take the Dash action as a Bonus Action.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Parry (DEX)')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Parry <span style="color:var(--muted);font-size:0.8rem">(+DEX mod)</span></div>
+              <span class="maneuver-timing timing-reaction">Reaction (when hit by melee)</span>
+              <div class="maneuver-desc">When a creature hits you with a melee attack, expend 1 SD to reduce damage by <span class="highlight">SD roll + 5</span>.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Parry (STR)')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Parry <span style="color:var(--muted);font-size:0.8rem">(+STR mod)</span></div>
+              <span class="maneuver-timing timing-reaction">Reaction (when hit by melee)</span>
+              <div class="maneuver-desc">When a creature hits you with a melee attack, expend 1 SD to reduce damage by <span class="highlight">SD roll + 0</span>.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Rally')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Rally</div>
+              <span class="maneuver-timing timing-bonus">Bonus Action</span>
+              <div class="maneuver-desc">Expend 1 SD to give an ally within 30 ft <span class="highlight">SD roll + 2 Temp HP</span> (they must be able to see/hear you).</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Tactical Assessment')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Tactical Assessment</div>
+              <span class="maneuver-timing timing-special">Special (INT/WIS check)</span>
+              <div class="maneuver-desc">When you make an INT (History or Investigation) or WIS (Insight) check, expend 1 SD and add the die to the roll.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Tactical Master: Push')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Tactical Master: Push</div>
+              <span class="maneuver-timing timing-action">Action (replace weapon mastery)</span>
+              <div class="maneuver-desc">Replace weapon mastery property with Push on an attack. Expend 1 SD.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Tactical Master: Sap')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Tactical Master: Sap</div>
+              <span class="maneuver-timing timing-action">Action (replace weapon mastery)</span>
+              <div class="maneuver-desc">Replace weapon mastery property with Sap on an attack. Expend 1 SD.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+          <div class="maneuver" onclick="useManeuver(this,'Tactical Master: Slow')">
+            <div class="maneuver-info">
+              <div class="maneuver-name">Tactical Master: Slow</div>
+              <span class="maneuver-timing timing-action">Action (replace weapon mastery)</span>
+              <div class="maneuver-desc">Replace weapon mastery property with Slow on an attack. Expend 1 SD.</div>
+            </div>
+            <div class="maneuver-cost">1 SD</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Weapons Tab -->
+      <div id="tab-weapons" class="tab-content card-body" style="padding-top:0">
+        <table class="weapon-table">
+          <thead>
+            <tr>
+              <th>Weapon</th>
+              <th>Hit</th>
+              <th>Damage</th>
+              <th>Properties</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="weapon-name">Rapier +1</div>
+                <div class="weapon-prop"><span class="weapon-mastery-badge vex-badge">VEX</span> Martial · Finesse</div>
+              </td>
+              <td class="weapon-hit">+10</td>
+              <td class="weapon-dmg">1d8+6</td>
+              <td><div style="font-size:0.75rem;color:var(--muted)">Piercing · Vex: hit → Adv on next attack</div></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="weapon-name">Pistol</div>
+                <div class="weapon-prop"><span class="weapon-mastery-badge vex-badge">VEX</span> Martial · Ammunition</div>
+              </td>
+              <td class="weapon-hit">+9</td>
+              <td class="weapon-dmg">1d10+5</td>
+              <td>
+                <div style="font-size:0.75rem;color:var(--muted)">Piercing · Range 30/90 · Gunner: no disadv indoors</div>
+                <div style="margin-top:4px">
+                  <span style="font-size:0.7rem;color:var(--accent2)">Ammo: </span>
+                  <span id="pistolAmmo" style="font-weight:700;color:var(--accent2)">7</span>
+                  <button class="ammo-btn" style="display:inline-flex;margin-left:6px;width:18px;height:18px;font-size:0.8rem" onclick="changeAmmo('pistolAmmo',-1)">−</button>
+                  <button class="ammo-btn" style="display:inline-flex;width:18px;height:18px;font-size:0.8rem" onclick="changeAmmo('pistolAmmo',1)">+</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="weapon-name">Dart</div>
+                <div class="weapon-prop"><span class="weapon-mastery-badge vex-badge">VEX</span> Simple · Finesse · Thrown</div>
+              </td>
+              <td class="weapon-hit">+9</td>
+              <td class="weapon-dmg">1d4+5</td>
+              <td>
+                <div style="font-size:0.75rem;color:var(--muted)">Piercing · Range 20/60</div>
+                <div style="margin-top:4px">
+                  <span style="font-size:0.7rem;color:var(--accent2)">Count: </span>
+                  <span id="dartAmmo" style="font-weight:700;color:var(--accent2)">5</span>
+                  <button class="ammo-btn" style="display:inline-flex;margin-left:6px;width:18px;height:18px;font-size:0.8rem" onclick="changeAmmo('dartAmmo',-1)">−</button>
+                  <button class="ammo-btn" style="display:inline-flex;width:18px;height:18px;font-size:0.8rem" onclick="changeAmmo('dartAmmo',1)">+</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="weapon-name">Dagger</div>
+                <div class="weapon-prop"><span class="weapon-mastery-badge nick-badge">NICK</span> Simple · Finesse · Light · Thrown</div>
+              </td>
+              <td class="weapon-hit">+9</td>
+              <td class="weapon-dmg">1d4+5</td>
+              <td><div style="font-size:0.75rem;color:var(--muted)">Piercing · Range 20/60 · Nick: extra attack as part of Attack action (not Bonus Action)</div></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="weapon-name">Unarmed Strike</div>
+                <div class="weapon-prop">—</div>
+              </td>
+              <td class="weapon-hit">+4</td>
+              <td class="weapon-dmg">1</td>
+              <td><div style="font-size:0.75rem;color:var(--muted)">Bludgeoning</div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="vex-tracker">
+          <h4>🟣 Vex Status Tracker (per creature)</h4>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">Hit with a Vex weapon → gain Advantage on next attack roll against that creature (resets each turn).</div>
+          <div id="vexTargets">
+            <div class="vex-target-row">
+              <div class="vex-toggle" onclick="toggleVex(this)">✓</div>
+              <span class="vex-label">Target 1: <span style="color:var(--purple)">Vex Adv Active</span></span>
+            </div>
+            <div class="vex-target-row">
+              <div class="vex-toggle" onclick="toggleVex(this)">✓</div>
+              <span class="vex-label">Target 2: <span style="color:var(--purple)">Vex Adv Active</span></span>
+            </div>
+            <div class="vex-target-row">
+              <div class="vex-toggle" onclick="toggleVex(this)">✓</div>
+              <span class="vex-label">Target 3: <span style="color:var(--purple)">Vex Adv Active</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ammunition tracking -->
+        <div class="section-divider"></div>
+        <div style="font-size:0.8rem;font-weight:700;margin-bottom:8px;color:var(--accent2)">Special Ammunition</div>
+        <div class="ammo-row">
+          <div>
+            <div class="ammo-name">Firearm Bullet of Slaying</div>
+            <div style="font-size:0.7rem;color:var(--muted)">Special damage vs. target type</div>
+          </div>
+          <div class="ammo-controls">
+            <button class="ammo-btn" onclick="changeAmmo('slayingAmmo',-1)">−</button>
+            <div class="ammo-count" id="slayingAmmo">2</div>
+            <button class="ammo-btn" onclick="changeAmmo('slayingAmmo',1)">+</button>
+          </div>
+        </div>
+        <div class="ammo-row">
+          <div>
+            <div class="ammo-name">Firearm Bullet +3</div>
+            <div style="font-size:0.7rem;color:var(--muted)">+3 to hit and damage</div>
+          </div>
+          <div class="ammo-controls">
+            <button class="ammo-btn" onclick="changeAmmo('plus3Ammo',-1)">−</button>
+            <div class="ammo-count" id="plus3Ammo">2</div>
+            <button class="ammo-btn" onclick="changeAmmo('plus3Ammo',1)">+</button>
+          </div>
+        </div>
+        <div class="ammo-row">
+          <div>
+            <div class="ammo-name">Basic Poison (applied)</div>
+            <div style="font-size:0.7rem;color:var(--muted)">Lasts 1 min or until damage dealt · DC 17 Con or Poisoned</div>
+          </div>
+          <div class="ammo-controls">
+            <button class="ammo-btn" onclick="changeAmmo('poisonDoses',-1)">−</button>
+            <div class="ammo-count" id="poisonDoses">0</div>
+            <button class="ammo-btn" onclick="changeAmmo('poisonDoses',1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Tab -->
+      <div id="tab-features" class="tab-content card-body" style="padding-top:0">
+
+        <div class="feature-item">
+          <div class="feature-name">Extra Attack (×3) <span class="badge badge-lr" style="background:rgba(33,150,243,0.2);color:var(--blue);border-color:var(--blue)">Per Turn</span></div>
+          <div class="feature-desc">When you take the Attack action, you can attack <strong>3 times</strong> instead of once.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Tactical Shift <span class="badge badge-sr">With 2nd Wind</span></div>
+          <div class="feature-desc">When you activate Second Wind as a Bonus Action, you can move up to speed/2 (15 ft) without provoking Opportunity Attacks.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Tactical Mind <span class="badge badge-sr">With 2nd Wind</span></div>
+          <div class="feature-desc">When you fail an ability check, you can expend a use of Second Wind (instead of HP) — roll 1d10 and add to the check. If it still fails, the Second Wind use is expended anyway.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Gunner <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive</span></div>
+          <div class="feature-desc">Ignore the Loading property of Firearms. Being within 5 ft of a hostile creature doesn't impose Disadvantage on ranged attack rolls.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Alert <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive</span></div>
+          <div class="feature-desc">Add +4 to Initiative rolls. <strong>Initiative Swap:</strong> immediately after rolling Initiative, you can swap your Initiative with one willing ally (unless either is Incapacitated).</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Weapon Mastery <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive</span></div>
+          <div class="feature-desc">
+            <strong>Vex</strong> (Rapier, Pistol, Dart): Hit → Advantage on next attack roll vs. that creature before end of turn.<br>
+            <strong>Nick</strong> (Dagger): The extra Light-weapon attack uses the Attack action, not Bonus Action. Once per turn.<br>
+            <strong>Sap</strong> (via Tactical Master): Target has Disadvantage on next attack roll before start of your next turn.
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Poisoner <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive + Bonus Action</span></div>
+          <div class="feature-desc">
+            <strong>Potent Poison:</strong> Damage rolls that deal poison damage ignore Resistance to Poison.<br>
+            <strong>Brew Poison:</strong> 1 hour + 50 gp → 4 doses of poison.<br>
+            <strong>Apply Poison:</strong> Bonus Action. Applied to weapon or ammo — lasts 1 min or until damage dealt.<br>
+            <strong>Effect:</strong> On hit, target makes DC 17 Con save or takes 2d8 Poison damage and has the Poisoned condition until end of your next turn.
+          </div>
+        </div>
+
+        <div class="poison-tracker">
+          <h4>☠️ Poison Application Tracker</h4>
+          <div class="ammo-row" style="border:none;padding:0">
+            <div class="ammo-name">Poison Doses Brewed (4/session)</div>
+            <div class="ammo-controls">
+              <button class="ammo-btn" onclick="changeAmmo('brewedDoses',-1)">−</button>
+              <div class="ammo-count" id="brewedDoses">4</div>
+              <button class="ammo-btn" onclick="changeAmmo('brewedDoses',1)">+</button>
+            </div>
+          </div>
+          <div class="ammo-row" style="border:none;padding:4px 0 0">
+            <div>
+              <div class="ammo-name">Poison Applied to Weapon?</div>
+              <div style="font-size:0.7rem;color:var(--muted)">Lasts 1 min · DC 17 Con · 2d8 Poison + Poisoned</div>
+            </div>
+            <div>
+              <button class="btn" style="background:var(--green);color:#000;font-size:0.75rem" onclick="togglePoisonActive()">Toggle Active</button>
+              <div id="poisonActiveStatus" style="font-size:0.75rem;color:var(--muted);margin-top:2px;text-align:center">Inactive</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-item" style="margin-top:8px">
+          <div class="feature-name">Defense Feat <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive</span></div>
+          <div class="feature-desc">+1 AC when wearing Light, Medium, or Heavy armor. (Already included in AC 21.)</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Resilient (DEX) <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive</span></div>
+          <div class="feature-desc">+1 to DEX score. Proficiency in DEX saving throws.</div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Ritual Link — Veiled <span class="badge" style="background:rgba(33,150,243,0.2);color:var(--blue);border:1px solid var(--blue)">Passive</span></div>
+          <div class="feature-desc">
+            <strong>See Invisibility</strong> (2nd level, 1 Action, 1 hour, Self) — via Ritual Link.<br>
+            <strong>Nondetection</strong> (3rd level, 1 Action, 8 hours, Touch, costs 25 gp material) — via Ritual Link.
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-name">Saving Throw Bonus <span class="badge" style="background:rgba(76,175,80,0.2);color:var(--green);border:1px solid var(--green)">Passive</span></div>
+          <div class="feature-desc">+1 bonus to all saving throws.</div>
+        </div>
+
+      </div>
+
+      <!-- Inventory Tab -->
+      <div id="tab-inventory" class="tab-content card-body" style="padding-top:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Equipment</div>
+            <div style="font-size:0.8rem;line-height:2;color:var(--text)">
+              Cloak of Protection (Attuned)<br>
+              Rapier +1<br>
+              Studded Leather Armor<br>
+              Shield<br>
+              Dagger<br>
+              Dart ×5<br>
+              Pistol<br>
+              Firearm Bullets ×7<br>
+              Firearm Bullet +3 ×2<br>
+              Firearm Bullet of Slaying ×2<br>
+              Basic Poison ×1<br>
+              Poisoner's Kit<br>
+              Thieves' Tools<br>
+              Manual of Gainful Exercise<br>
+              Purple "eye" gem ×2<br>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Supplies</div>
+            <div style="font-size:0.8rem;line-height:2;color:var(--text)">
+              Bedroll<br>
+              Mess Kit<br>
+              Rations (1 day) ×10<br>
+              Rope, Hempen 50 ft<br>
+              Tinderbox<br>
+              Torch ×10<br>
+              Waterskin<br>
+            </div>
+            <div style="margin-top:12px;font-size:0.75rem;font-weight:700;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Currency</div>
+            <div style="font-size:0.8rem;line-height:2;color:var(--text)">
+              GP: <input id="gpCount" type="number" value="20" style="width:60px;background:#0f3460;border:1px solid var(--border);border-radius:4px;color:var(--accent2);padding:2px 6px;font-weight:700">
+            </div>
+          </div>
+        </div>
+        <div class="section-divider"></div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Proficiencies</div>
+        <div style="font-size:0.8rem;color:var(--muted);line-height:1.8">
+          <strong style="color:var(--text)">Armor:</strong> Heavy, Light, Medium, Shields<br>
+          <strong style="color:var(--text)">Weapons:</strong> Firearms, Martial Weapons, Simple Weapons<br>
+          <strong style="color:var(--text)">Tools:</strong> Poisoner's Kit, Thieves' Tools, Tinker's Tools<br>
+          <strong style="color:var(--text)">Languages:</strong> Common, Gnomish<br>
+          <strong style="color:var(--text)">Saves:</strong> STR +5, DEX +10, CON +7, INT +3, WIS +2, CHA +3 (all +1 bonus)
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Sergio De La Torre · Fighter 11 · Battle Master · findlerman09 · D&D 5e 2024
+</footer>
+
+<script>
+// ======= STATE =======
+const state = {
+  currentHP: 98,
+  maxHP: 98,
+  supDice: 5,
+  secondWind: 4,
+  actionSurge: 1,
+  indomitable: 1,
+  knowEnemy: 1,
+  hitDice: 11,
+  poisonActive: false,
+  deathSuccesses: 0,
+  deathFailures: 0,
+};
+
+// ======= INIT =======
+function init() {
+  renderPips('supDice', state.supDice, 5, 'sd-pips', '⬡');
+  renderPips('secondWind', state.secondWind, 4, '', '');
+  renderPips('actionSurge', state.actionSurge, 1, '', '');
+  renderPips('indomitable', state.indomitable, 1, '', '');
+  renderPips('knowEnemy', state.knowEnemy, 1, '', '');
+  renderHitDice();
+  updateHPBar();
+  updateSDCount();
+}
+
+function renderPips(id, current, max, extraClass, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '';
+  el.className = 'pips ' + extraClass;
+  for (let i = 0; i < max; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'pip' + (i >= current ? ' used' : '');
+    pip.textContent = label || '';
+    pip.onclick = () => togglePip(id, i, max, extraClass, label);
+    el.appendChild(pip);
+  }
+}
+
+function togglePip(id, index, max, extraClass, label) {
+  // clicking a filled pip empties it and all after; clicking empty fills it and all before
+  const el = document.getElementById(id);
+  const pips = el.querySelectorAll('.pip');
+  const usedCount = [...pips].filter(p => !p.classList.contains('used')).length;
+  // determine new count
+  let newCount;
+  if (pips[index].classList.contains('used')) {
+    newCount = index + 1; // fill up to this
+  } else {
+    newCount = index; // empty from this onward
+  }
+  state[id] = newCount;
+  renderPips(id, newCount, max, extraClass, label);
+  if (id === 'supDice') updateSDCount();
+}
+
+function updateSDCount() {
+  const el = document.getElementById('sdCount');
+  if (el) el.textContent = `${state.supDice} / 5 remaining`;
+}
+
+function renderHitDice() {
+  const el = document.getElementById('hitDice');
+  el.innerHTML = '';
+  for (let i = 0; i < 11; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'pip' + (i >= state.hitDice ? ' used' : '');
+    pip.textContent = 'd10';
+    pip.style.fontSize = '0.55rem';
+    pip.style.width = '32px';
+    pip.style.height = '32px';
+    pip.style.borderColor = i < state.hitDice ? 'var(--accent2)' : '#444';
+    pip.style.background = i < state.hitDice ? 'var(--accent2)' : 'transparent';
+    pip.style.color = i < state.hitDice ? '#000' : '#555';
+    pip.style.borderRadius = '6px';
+    pip.onclick = () => {
+      state.hitDice = i < state.hitDice ? i : i + 1;
+      renderHitDice();
+    };
+    el.appendChild(pip);
+  }
+}
+
+function restoreHD(n) {
+  state.hitDice = Math.min(11, state.hitDice + n);
+  renderHitDice();
+}
+
+// ======= HP =======
+function updateHPBar() {
+  const cur = parseInt(document.getElementById('currentHP').value) || 0;
+  state.currentHP = cur;
+  const pct = Math.min(100, Math.max(0, (cur / state.maxHP) * 100));
+  document.getElementById('hpBar').style.width = pct + '%';
+  // Death saves visibility
+  document.getElementById('deathSaves').style.display = cur <= 0 ? 'flex' : 'none';
+}
+
+function adjustHP(direction) {
+  const amount = parseInt(document.getElementById('hpInput').value) || 0;
+  let cur = parseInt(document.getElementById('currentHP').value) || 0;
+  cur = Math.min(state.maxHP, Math.max(0, cur + direction * amount));
+  document.getElementById('currentHP').value = cur;
+  updateHPBar();
+  document.getElementById('hpInput').value = '';
+}
+
+function toggleDS(el, type) {
+  el.classList.toggle(type + '-filled');
+}
+
+// ======= STATUS CHIPS =======
+function toggleStatus(el) {
+  if (el.classList.contains('inactive')) {
+    el.classList.remove('inactive');
+    el.classList.add(el.dataset.type);
+  } else {
+    el.classList.remove(el.dataset.type);
+    el.classList.add('inactive');
+  }
+}
+
+// ======= TABS =======
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const tabs = ['maneuvers','weapons','features','inventory'];
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ======= MANEUVERS =======
+function useManeuver(el, name) {
+  if (state.supDice <= 0) {
+    el.style.borderColor = 'var(--red)';
+    el.style.background = 'rgba(244,67,54,0.1)';
+    setTimeout(() => {
+      el.style.borderColor = '';
+      el.style.background = '';
+    }, 800);
+    return;
+  }
+  el.classList.toggle('tracking');
+  if (el.classList.contains('tracking')) {
+    // spend a die
+    state.supDice = Math.max(0, state.supDice - 1);
+    renderPips('supDice', state.supDice, 5, 'sd-pips', '⬡');
+    updateSDCount();
+    // add badge
+    let badge = el.querySelector('.tracking-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'tracking-badge';
+      badge.textContent = 'Used';
+      el.appendChild(badge);
+    }
+  } else {
+    // refund the die
+    state.supDice = Math.min(5, state.supDice + 1);
+    renderPips('supDice', state.supDice, 5, 'sd-pips', '⬡');
+    updateSDCount();
+    const badge = el.querySelector('.tracking-badge');
+    if (badge) badge.remove();
+  }
+}
+
+// ======= COMBAT SLOTS =======
+function toggleSlot(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('spent');
+}
+
+function resetTurn() {
+  ['slot-action','slot-bonus','slot-reaction','slot-movement','slot-object','slot-maneuver'].forEach(id => {
+    document.getElementById(id).classList.remove('spent');
+  });
+  document.querySelectorAll('.attack-pip').forEach(p => p.classList.remove('used'));
+  // reset vex per-turn
+  document.querySelectorAll('.vex-toggle').forEach(v => {
+    v.classList.remove('active');
+  });
+  // clear maneuver tracking
+  document.querySelectorAll('.maneuver.tracking').forEach(m => {
+    m.classList.remove('tracking');
+    const badge = m.querySelector('.tracking-badge');
+    if (badge) badge.remove();
+  });
+}
+
+function toggleAttack(el) {
+  el.classList.toggle('used');
+}
+
+// ======= VEX =======
+function toggleVex(el) {
+  el.classList.toggle('active');
+}
+
+// ======= AMMO =======
+function changeAmmo(id, delta) {
+  const el = document.getElementById(id);
+  const cur = parseInt(el.textContent) || 0;
+  el.textContent = Math.max(0, cur + delta);
+}
+
+// ======= RESTS =======
+function shortRest() {
+  state.supDice = 5;
+  renderPips('supDice', 5, 5, 'sd-pips', '⬡');
+  updateSDCount();
+  state.actionSurge = 1;
+  renderPips('actionSurge', 1, 1, '', '');
+  // clear maneuver used state
+  document.querySelectorAll('.maneuver.tracking').forEach(m => {
+    m.classList.remove('tracking');
+    const badge = m.querySelector('.tracking-badge');
+    if (badge) badge.remove();
+  });
+  flash('Short Rest: Superiority Dice restored (5), Action Surge restored');
+}
+
+function longRest() {
+  state.supDice = 5;
+  state.secondWind = 4;
+  state.actionSurge = 1;
+  state.indomitable = 1;
+  state.knowEnemy = 1;
+  renderPips('supDice', 5, 5, 'sd-pips', '⬡');
+  updateSDCount();
+  renderPips('secondWind', 4, 4, '', '');
+  renderPips('actionSurge', 1, 1, '', '');
+  renderPips('indomitable', 1, 1, '', '');
+  renderPips('knowEnemy', 1, 1, '', '');
+  document.getElementById('currentHP').value = state.maxHP;
+  updateHPBar();
+  renderHitDice();
+  document.querySelectorAll('.maneuver.tracking').forEach(m => {
+    m.classList.remove('tracking');
+    const badge = m.querySelector('.tracking-badge');
+    if (badge) badge.remove();
+  });
+  // clear status conditions
+  document.querySelectorAll('.status-chip').forEach(c => {
+    const t = c.dataset.type;
+    c.classList.remove(t, 'active-buff','active-debuff','active-neutral');
+    c.classList.add('inactive');
+  });
+  flash('Long Rest: All resources restored, HP fully healed!');
+}
+
+function flash(msg) {
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;top:20px;right:20px;background:var(--green);color:#000;padding:10px 20px;border-radius:8px;font-weight:700;font-size:0.9rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:opacity 0.5s';
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(() => { div.style.opacity = '0'; }, 2500);
+  setTimeout(() => div.remove(), 3000);
+}
+
+// ======= POISON ACTIVE =======
+function togglePoisonActive() {
+  state.poisonActive = !state.poisonActive;
+  const el = document.getElementById('poisonActiveStatus');
+  el.textContent = state.poisonActive ? '☠️ ACTIVE — 2d8 Poison on hit (DC 17 Con)' : 'Inactive';
+  el.style.color = state.poisonActive ? 'var(--green)' : 'var(--muted)';
+}
+
+// ======= LOCAL STORAGE PERSISTENCE =======
+function saveState() {
+  const data = {
+    currentHP: document.getElementById('currentHP').value,
+    tempHP: document.getElementById('tempHP').value,
+    supDice: state.supDice,
+    secondWind: state.secondWind,
+    actionSurge: state.actionSurge,
+    indomitable: state.indomitable,
+    knowEnemy: state.knowEnemy,
+    hitDice: state.hitDice,
+    pistolAmmo: document.getElementById('pistolAmmo').textContent,
+    dartAmmo: document.getElementById('dartAmmo').textContent,
+    slayingAmmo: document.getElementById('slayingAmmo').textContent,
+    plus3Ammo: document.getElementById('plus3Ammo').textContent,
+    poisonDoses: document.getElementById('poisonDoses').textContent,
+    brewedDoses: document.getElementById('brewedDoses').textContent,
+    gpCount: document.getElementById('gpCount').value,
+    poisonActive: state.poisonActive,
+  };
+  localStorage.setItem('sergio_state', JSON.stringify(data));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('sergio_state');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data.currentHP !== undefined) document.getElementById('currentHP').value = data.currentHP;
+    if (data.tempHP !== undefined) document.getElementById('tempHP').value = data.tempHP;
+    if (data.supDice !== undefined) state.supDice = data.supDice;
+    if (data.secondWind !== undefined) state.secondWind = data.secondWind;
+    if (data.actionSurge !== undefined) state.actionSurge = data.actionSurge;
+    if (data.indomitable !== undefined) state.indomitable = data.indomitable;
+    if (data.knowEnemy !== undefined) state.knowEnemy = data.knowEnemy;
+    if (data.hitDice !== undefined) state.hitDice = data.hitDice;
+    if (data.pistolAmmo) document.getElementById('pistolAmmo').textContent = data.pistolAmmo;
+    if (data.dartAmmo) document.getElementById('dartAmmo').textContent = data.dartAmmo;
+    if (data.slayingAmmo) document.getElementById('slayingAmmo').textContent = data.slayingAmmo;
+    if (data.plus3Ammo) document.getElementById('plus3Ammo').textContent = data.plus3Ammo;
+    if (data.poisonDoses) document.getElementById('poisonDoses').textContent = data.poisonDoses;
+    if (data.brewedDoses) document.getElementById('brewedDoses').textContent = data.brewedDoses;
+    if (data.gpCount) document.getElementById('gpCount').value = data.gpCount;
+    if (data.poisonActive) {
+      state.poisonActive = data.poisonActive;
+      if (state.poisonActive) {
+        document.getElementById('poisonActiveStatus').textContent = '☠️ ACTIVE — 2d8 Poison on hit (DC 17 Con)';
+        document.getElementById('poisonActiveStatus').style.color = 'var(--green)';
+      }
+    }
+  } catch(e) {}
+}
+
+// Auto-save every 5 seconds
+setInterval(saveState, 5000);
+
+// ======= BOOT =======
+loadState();
+init();
+</script>
+</body>
+</html>
