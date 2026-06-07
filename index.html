@@ -403,8 +403,29 @@ input.ehp:focus{outline:none;border-color:var(--red)}
 .scc.on.debuff{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.1);box-shadow:var(--gR)}
 .scc.on.neutral{border-color:var(--blue);color:var(--blue);background:rgba(61,139,255,.1)}
 
-/* MANEUVER DC badge */
-.man-dc{font-size:.58rem;font-weight:700;color:rgba(168,85,247,.7);margin-top:3px;font-family:'Roboto Mono',monospace}
+/* THREAT DISPLAY */
+.threat-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+input.ethreat{width:50px;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;
+  color:var(--muted);text-align:center;padding:3px 4px;font-size:.73rem;font-family:'Roboto Mono',monospace}
+input.ethreat:focus{outline:none;border-color:var(--gold)}
+.threat-display{flex:1;display:flex;gap:8px;flex-wrap:wrap;font-size:.65rem;font-family:'Roboto Mono',monospace}
+
+/* ROLEPLAY */
+textarea.rp-ta{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);padding:6px 8px;font-size:.75rem;font-family:'Inter',sans-serif;
+  resize:vertical;line-height:1.45;min-height:34px}
+textarea.rp-ta:focus{outline:none;border-color:var(--gold)}
+.npc-row{display:flex;gap:5px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.npc-row:last-child{border-bottom:none}
+input.npc-name{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;
+  color:var(--text);padding:4px 7px;font-size:.78rem;font-family:'Rajdhani',sans-serif;font-weight:700}
+input.npc-name:focus{outline:none;border-color:var(--gold)}
+select.npc-rel{background:#0a0f1e;border:1px solid var(--border2);border-radius:5px;
+  padding:4px 5px;font-size:.7rem;cursor:pointer;min-width:70px}
+select.npc-rel:focus{outline:none}
+input.npc-notes{flex:2;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;
+  color:var(--muted);padding:4px 7px;font-size:.72rem;font-family:'Inter',sans-serif}
+input.npc-notes:focus{outline:none;border-color:var(--gold);color:var(--text)}
 
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2)}
@@ -609,6 +630,33 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
       <div class="sk"><div class="skd p"></div><div class="skn">Sleight of Hand</div><div class="skm">+9</div></div>
       <div class="sk"><div class="skd p"></div><div class="skn">Stealth</div><div class="skm">+9</div></div>
       <div class="sk"><div class="skd"></div><div class="skn">Survival</div><div class="skm">+1</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch coll-toggle" onclick="toggleColl('rp-body',this)">🎭 Roleplay Aids <span class="coll-arrow">▾</span></div>
+  <div class="cb coll-body" id="rp-body">
+    <div class="tabs" id="rp-tabs">
+      <div class="tab active" onclick="showRpTab('character')">Character</div>
+      <div class="tab" onclick="showRpTab('npcs')">NPCs</div>
+    </div>
+    <div id="rpt-character" style="padding:10px 0">
+      <div style="font-size:.67rem;color:var(--muted);margin-bottom:8px">Fill in from your sheet. Saved automatically.</div>
+      <div style="margin-bottom:7px"><div class="hp-lbl">Personality Traits</div>
+        <textarea class="rp-ta" id="rp-traits" rows="2" placeholder="e.g. Always calm, never raises voice. Always has a plan when things go wrong."></textarea></div>
+      <div style="margin-bottom:7px"><div class="hp-lbl">Ideal</div>
+        <textarea class="rp-ta" id="rp-ideal" rows="1" placeholder="What core value drives Sergio?"></textarea></div>
+      <div style="margin-bottom:7px"><div class="hp-lbl">Bond</div>
+        <textarea class="rp-ta" id="rp-bond" rows="1" placeholder="Who or what does he protect or owe?"></textarea></div>
+      <div style="margin-bottom:7px"><div class="hp-lbl">Flaw</div>
+        <textarea class="rp-ta" id="rp-flaw" rows="1" placeholder="What gets him into trouble?"></textarea></div>
+      <div><div class="hp-lbl">Session Notes</div>
+        <textarea class="rp-ta" id="rp-notes" rows="3" placeholder="Goals, DM hooks, plot threads…"></textarea></div>
+    </div>
+    <div id="rpt-npcs" style="padding:10px 0;display:none">
+      <div id="npcList"></div>
+      <button class="btn bblue" style="width:100%;margin-top:7px;font-size:.75rem" onclick="addNPC()">+ Add NPC</button>
     </div>
   </div>
 </div>
@@ -1024,7 +1072,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.6.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.7.0</span></footer>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -1048,7 +1096,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 const S={hp:98,maxHp:98,sd:5,sw:4,as:1,ind:1,kye:1,hd:11,poisonActive:false,round:1,turn:1};
 let logE=[];
 
-function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();renderEnemies();renderVexViz();runAdvisor();}
+function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();renderEnemies();renderVexViz();renderNPCs();runAdvisor();}
 // close modal on overlay click
 document.addEventListener('click',e=>{const m=document.getElementById('preCombatModal');if(m&&e.target===m)closePreCombat();});
 
@@ -1096,6 +1144,8 @@ function adjHP(dir){const a=parseInt(document.getElementById('adjV').value)||0;i
   if(dir<0){
     const isConc=[...document.querySelectorAll('.scc.on')].some(el=>el.textContent.includes('Concentrating'));
     if(isConc){const dc=Math.max(10,Math.floor(a/2));addLog(`⚠ Concentration check: CON save DC ${dc}`);showConcAlert(dc,a);}
+    const reactEl=document.getElementById('sl-r');
+    if(reactEl&&!reactEl.classList.contains('spent')&&S.sd>0)showReactionAlert(a);
   }
   updateHP();}
 function showConcAlert(dc,dmg){
@@ -1114,20 +1164,20 @@ function useSurge(){if(S.as<=0){toast('Action Surge already spent!');return;}
   S.as=0;renderPips('asP',0,1);document.getElementById('surgeLabel').textContent='SPENT';
   document.getElementById('sl-surge').classList.add('spent');addLog('ACTION SURGE used');runAdvisor();updateCombos();toast('⚡ Action Surge! Extra action this turn (not Magic action).');}
 // ENEMIES array — source of truth for all enemy state
-let enemies=Array.from({length:3},()=>({name:'',hp:'',prevHp:0,vex:{turns:0,used:false}}));
+let enemies=Array.from({length:3},()=>({name:'',hp:'',prevHp:0,vex:{turns:0,used:false},ac:'',atk:''}));
 let dmgDealt=0;
 
 function ename(i){return enemies[i]?.name||`Tango ${String(i+1).padStart(2,'0')}`;}
 
 function addEnemy(){
-  enemies.push({name:'',hp:'',prevHp:0,vex:{turns:0,used:false}});
+  enemies.push({name:'',hp:'',prevHp:0,vex:{turns:0,used:false},ac:'',atk:''});
   renderEnemies();renderVexViz();
 }
 function removeEnemy(idx){
   enemies.splice(idx,1);renderEnemies();renderVexViz();runAdvisor();
 }
 function clearEnemy(idx){
-  enemies[idx]={name:'',hp:'',prevHp:0,vex:{turns:0,used:false}};
+  enemies[idx]={name:'',hp:'',prevHp:0,vex:{turns:0,used:false},ac:'',atk:''};
   renderEnemies();renderVexViz();
 }
 function trackEnemyHP(idx,el){
@@ -1160,6 +1210,13 @@ function renderEnemies(){
         <input class="ehp" type="number" placeholder="HP" min="0" value="${e.hp||''}"
           oninput="trackEnemyHP(${i},this)">
       </div>
+      <div class="threat-row">
+        <input class="ethreat" type="number" placeholder="AC" value="${e.ac||''}"
+          oninput="enemies[${i}].ac=this.value;renderThreat(${i})">
+        <input class="ethreat" type="number" placeholder="+ATK" value="${e.atk||''}"
+          oninput="enemies[${i}].atk=this.value;renderThreat(${i})">
+        <div class="threat-display" id="threat-${i}"></div>
+      </div>
       <div class="econd-row">
         <span class="ec${e.vex.turns>0?' vex':''}" onclick="toggleVexCond(${i})">Vex ▲</span>
         <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
@@ -1169,7 +1226,28 @@ function renderEnemies(){
         <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>`;
     c.appendChild(d);
+    renderThreat(i);
   });
+}
+
+function renderThreat(idx){
+  const el=document.getElementById(`threat-${idx}`);if(!el)return;
+  const e=enemies[idx];let html='';
+  if(e.ac){
+    const ac=parseInt(e.ac)||10;
+    const hits=Math.min(19,Math.max(1,31-ac));
+    const p=Math.round(hits/20*100);
+    const col=p>=70?'var(--green)':p>=40?'var(--amber)':'var(--red)';
+    html+=`<span style="color:${col}">You: <strong>${p}%</strong></span>`;
+  }
+  if(e.atk!==undefined&&e.atk!==''){
+    const atk=parseInt(e.atk)||0;
+    const hits2=Math.min(19,Math.max(1,atk));
+    const p2=Math.round(hits2/20*100);
+    const col2=p2<=30?'var(--green)':p2<=55?'var(--amber)':'var(--red)';
+    html+=`<span style="color:${col2}">Them: <strong>${p2}%</strong></span>`;
+  }
+  el.innerHTML=html;
 }
 
 function toggleVexCond(idx){
@@ -1211,6 +1289,19 @@ function renderVexViz(){
 }
 
 function newTurn(){
+  // Post-turn coaching — check BEFORE slots reset
+  const coach=[];
+  const reactEl=document.getElementById('sl-r');
+  if(reactEl&&!reactEl.classList.contains('spent')&&S.sd>0)
+    coach.push(`Reaction unused with ${S.sd} SD — Parry (1d10+5) was available`);
+  const expVex=enemies.filter(e=>e.vex.turns===1);
+  if(expVex.length)
+    coach.push(`Vex window was expiring on ${expVex.map((_,i)=>ename(enemies.indexOf(_))).join(', ')} — was advantage used?`);
+  const unusedAtks=[...document.querySelectorAll('.atkp:not(.u)')].length;
+  if(unusedAtks===3&&!document.getElementById('sl-a').classList.contains('spent'))
+    coach.push('No attacks tracked — did you forget to attack?');
+  if(coach.length){addLog('💡 '+coach[0]);if(coach.length>1)setTimeout(()=>coach.slice(1).forEach(c=>addLog('💡 '+c)),100);}
+
   ['sl-a','sl-b','sl-r','sl-m','sl-o'].forEach(id=>document.getElementById(id).classList.remove('spent'));
   document.querySelectorAll('.atkp').forEach(p=>p.classList.remove('u'));
   document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
@@ -1324,6 +1415,55 @@ function runAdvisor(){
     d.innerHTML=`<div class="advc-icon">${a.i}</div><div><div class="advc-label">${a.l}</div><div class="advc-text">${a.t}</div></div>`;body.appendChild(d);});
 }
 
+// REACTION ALERT
+function showReactionAlert(dmg){
+  document.querySelectorAll('.react-alert').forEach(e=>e.remove());
+  const d=document.createElement('div');d.className='react-alert';
+  d.style.cssText='position:fixed;bottom:80px;right:22px;z-index:9999;background:linear-gradient(135deg,#080e20,#0f1525);border:1px solid var(--blue);border-radius:10px;padding:12px 16px;box-shadow:var(--gB),0 10px 40px rgba(0,0,0,.5);min-width:230px;font-family:Rajdhani,sans-serif';
+  d.innerHTML=`<div style="font-size:.68rem;font-weight:700;letter-spacing:1.5px;color:var(--blue);margin-bottom:4px">🛡 PARRY AVAILABLE</div>
+    <div style="font-size:.82rem;color:var(--text);margin-bottom:8px">Reaction + 1 SD → reduce dmg by <strong style="color:var(--blue)">1d10+5</strong></div>
+    <div style="display:flex;gap:7px">
+      <button onclick="useParry(this.closest('.react-alert'))" style="flex:1;background:rgba(61,139,255,.2);border:1px solid rgba(61,139,255,.5);color:var(--blue);border-radius:7px;padding:5px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.78rem">Use Parry (1 SD)</button>
+      <button onclick="this.closest('.react-alert').remove()" style="background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--muted);border-radius:7px;padding:5px 10px;cursor:pointer;font-family:Rajdhani,sans-serif;font-size:.78rem">Skip</button>
+    </div>`;
+  document.body.appendChild(d);
+  setTimeout(()=>{if(d.parentNode){d.style.opacity='0';d.style.transition='opacity .4s';setTimeout(()=>d.remove(),400);}},9000);
+}
+function useParry(alertEl){
+  if(S.sd<=0){toast('No SD!');return;}
+  S.sd=Math.max(0,S.sd-1);renderSD();
+  document.getElementById('sl-r')?.classList.add('spent');
+  addLog('Parry used — reduce melee dmg by 1d10+5 (Reaction + SD spent)');
+  runAdvisor();updateCombos();alertEl?.remove();
+  toast('🛡 Parry! Roll 1d10+5, subtract from damage.');
+}
+
+// NPC TRACKER
+let npcs=[];
+const relColors={ally:'var(--green)',contact:'var(--blue)',neutral:'var(--muted)',rival:'var(--amber)',enemy:'var(--red)',unknown:'#4b5680'};
+function addNPC(){npcs.push({name:'',rel:'ally',notes:''});renderNPCs();saveState();}
+function removeNPC(i){npcs.splice(i,1);renderNPCs();saveState();}
+function renderNPCs(){
+  const c=document.getElementById('npcList');if(!c)return;
+  if(npcs.length===0){c.innerHTML='<div style="font-size:.75rem;color:var(--muted);text-align:center;padding:8px;font-style:italic">No NPCs yet — add people Sergio knows.</div>';return;}
+  c.innerHTML='';
+  npcs.forEach((n,i)=>{
+    const row=document.createElement('div');row.className='npc-row';
+    row.innerHTML=`<input class="npc-name" type="text" placeholder="Name…" value="${n.name.replace(/"/g,'&quot;')}" oninput="npcs[${i}].name=this.value;saveState()">
+      <select class="npc-rel" style="color:${relColors[n.rel]||'var(--muted)'}" onchange="npcs[${i}].rel=this.value;this.style.color=relColors[this.value]||'var(--muted)';saveState()">
+        ${['ally','contact','neutral','rival','enemy','unknown'].map(r=>`<option value="${r}"${n.rel===r?' selected':''}>${r}</option>`).join('')}
+      </select>
+      <input class="npc-notes" type="text" placeholder="Notes…" value="${n.notes.replace(/"/g,'&quot;')}" oninput="npcs[${i}].notes=this.value;saveState()">
+      <button class="init-act-btn" onclick="removeNPC(${i})" title="Remove">🗑</button>`;
+    c.appendChild(row);
+  });
+}
+function showRpTab(tab){
+  document.getElementById('rpt-character').style.display=tab==='character'?'block':'none';
+  document.getElementById('rpt-npcs').style.display=tab==='npcs'?'block':'none';
+  document.querySelectorAll('#rp-tabs .tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='character'?0:1)));
+}
+
 // SERGIO SELF-CONDITIONS
 function togSC(el,name){
   el.classList.toggle('on');
@@ -1375,13 +1515,15 @@ function copyLog(){
 function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.style.opacity='0',2600);setTimeout(()=>d.remove(),3100);}
 
 // PERSIST
-function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40)}));}catch(e){}}
+function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40),npcs,rpTraits:document.getElementById('rp-traits')?.value,rpIdeal:document.getElementById('rp-ideal')?.value,rpBond:document.getElementById('rp-bond')?.value,rpFlaw:document.getElementById('rp-flaw')?.value,rpNotes:document.getElementById('rp-notes')?.value}));}catch(e){}}
 function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)return;const d=JSON.parse(raw);
   if(d.hp!==undefined){S.hp=d.hp;document.getElementById('curHP').value=d.hp;}
   ['sd','sw','as','ind','kye','hd','poisonActive','round','turn'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k];});
   ['pistolA','dartA','slayA','p3A','bdA','prA'].forEach(k=>{if(d[k])document.getElementById(k).textContent=d[k];});
   if(d.log){logE=d.log;renderLog();}if(S.poisonActive)updatePoisonUI();
   if(S.as===0){document.getElementById('surgeLabel').textContent='Spent';document.getElementById('sl-surge').classList.add('spent');}
+  if(d.npcs){npcs=d.npcs;renderNPCs();}
+  ['rpTraits','rpIdeal','rpBond','rpFlaw','rpNotes'].forEach(k=>{const el=document.getElementById('rp-'+k.slice(2).toLowerCase());if(el&&d[k])el.value=d[k];});
 }catch(e){}}
 
 // ═══ INITIATIVE TRACKER ═══
