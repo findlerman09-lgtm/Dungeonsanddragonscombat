@@ -464,6 +464,41 @@ input.npc-notes:focus{outline:none;border-color:var(--gold);color:var(--text)}
 .init-hp-bar{height:3px;border-radius:2px;margin-top:3px;background:rgba(255,255,255,.08);overflow:hidden;cursor:pointer}
 .init-hp-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
 
+/* DICE ROLLER */
+.dice-grid{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.dbtn{width:50px;height:50px;border-radius:10px;border:2px solid var(--border2);background:rgba(255,255,255,.03);
+  color:var(--text);font-family:'Roboto Mono',monospace;font-weight:700;font-size:.85rem;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center}
+.dbtn:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,160,23,.08);transform:translateY(-2px)}
+.dbtn.d20-btn{border-color:rgba(61,139,255,.35);color:var(--blue)}
+.dbtn.d20-btn:hover{border-color:var(--blue);background:rgba(61,139,255,.1);color:var(--blue)}
+.dice-result-area{text-align:center;padding:14px 0 10px}
+.dice-big{font-size:3.6rem;font-weight:900;color:var(--gold2);font-family:'Roboto Mono',monospace;line-height:1;
+  transition:color .3s;min-height:58px;display:flex;align-items:center;justify-content:center}
+.dice-big.nat20{color:var(--green)!important;text-shadow:0 0 24px rgba(16,185,129,.6)}
+.dice-big.nat1{color:var(--red)!important;text-shadow:0 0 24px rgba(239,68,68,.5)}
+@keyframes dPop{0%{transform:scale(.7);opacity:.4}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.dice-big.popped{animation:dPop .28s ease-out}
+.dice-formula-lbl{font-size:.7rem;color:var(--muted);font-family:'Roboto Mono',monospace;margin-top:2px}
+.dice-breakdown-lbl{font-size:.68rem;color:#4b5680;font-family:'Roboto Mono',monospace;margin-top:2px}
+.dice-custom-row{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:11px}
+.dice-custom-row input[type=number]{width:52px;background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  border-radius:6px;color:var(--text);padding:5px 6px;text-align:center;font-family:'Roboto Mono',monospace;font-size:.9rem}
+.dice-custom-row input[type=number]:focus{outline:none;border-color:var(--gold)}
+.dice-custom-row select{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
+  color:var(--text);padding:5px 6px;font-family:'Roboto Mono',monospace;font-size:.85rem;cursor:pointer}
+.dice-custom-row select:focus{outline:none}
+.dice-custom-row .dlbl{font-family:'Roboto Mono',monospace;color:var(--muted);font-size:.9rem}
+.dice-presets{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.dpreset{font-size:.7rem;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.03);
+  border:1px solid var(--border2);color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;
+  font-weight:700;letter-spacing:.5px;transition:all .15s;white-space:nowrap}
+.dpreset:hover{border-color:var(--gold);color:var(--gold2);background:rgba(212,160,23,.07)}
+.dice-hist-list{margin-top:10px;display:flex;flex-direction:column;gap:2px;max-height:90px;overflow-y:auto}
+.dhist{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;padding:3px 6px;
+  border-radius:4px;background:rgba(255,255,255,.02);font-family:'Roboto Mono',monospace;color:var(--muted)}
+.dhist .dh-val{color:var(--gold2);font-weight:700;font-size:.8rem}
+
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2)}
 .tab{padding:8px 14px;cursor:pointer;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;font-family:'Rajdhani',sans-serif}
@@ -989,6 +1024,53 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
   </div>
 </div>
 
+<!-- DICE ROLLER -->
+<div class="card">
+  <div class="ch">🎲 Dice Roller</div>
+  <div class="cb">
+    <div class="dice-grid">
+      <button class="dbtn" onclick="quickRoll(4)">d4</button>
+      <button class="dbtn" onclick="quickRoll(6)">d6</button>
+      <button class="dbtn" onclick="quickRoll(8)">d8</button>
+      <button class="dbtn" onclick="quickRoll(10)">d10</button>
+      <button class="dbtn" onclick="quickRoll(12)">d12</button>
+      <button class="dbtn d20-btn" onclick="quickRoll(20)">d20</button>
+      <button class="dbtn" onclick="quickRoll(100)" style="font-size:.72rem">d100</button>
+    </div>
+    <div class="dice-custom-row">
+      <input type="number" id="dNum" value="1" min="1" max="20" style="width:44px">
+      <span class="dlbl">d</span>
+      <select id="dSides">
+        <option>4</option><option>6</option><option>8</option>
+        <option selected>10</option><option>12</option><option>20</option><option>100</option>
+      </select>
+      <span class="dlbl">+</span>
+      <input type="number" id="dMod" value="0" style="width:50px">
+      <button class="btn bblue" style="font-size:.78rem;padding:5px 14px" onclick="customRoll()">Roll</button>
+    </div>
+    <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+      <div class="dice-result-area">
+        <div class="dice-big" id="diceBig">—</div>
+        <div class="dice-formula-lbl" id="diceFormula"></div>
+        <div class="dice-breakdown-lbl" id="diceBreakdown"></div>
+      </div>
+    </div>
+    <div class="dice-presets">
+      <button class="dpreset" onclick="presetRoll('Initiative',1,20,9)">⚡ Initiative +9</button>
+      <button class="dpreset" onclick="presetRoll('Rapier hit',1,20,10)">⚔ Rapier +10</button>
+      <button class="dpreset" onclick="presetRoll('Pistol hit',1,20,9)">🔫 Pistol +9</button>
+      <button class="dpreset" onclick="presetRoll('Rapier dmg',1,8,6)">⚔ Dmg 1d8+6</button>
+      <button class="dpreset" onclick="presetRoll('Pistol dmg',1,10,5)">🔫 Dmg 1d10+5</button>
+      <button class="dpreset" onclick="presetRoll('Sup Die',1,10,0)">💜 SD 1d10</button>
+      <button class="dpreset" onclick="presetRoll('2nd Wind',1,10,11)">💚 2nd Wind +11</button>
+      <button class="dpreset" onclick="presetRoll('Parry',1,10,5)">🛡 Parry 1d10+5</button>
+      <button class="dpreset" onclick="presetRoll('Poison dmg',2,8,0)">☠ Poison 2d8</button>
+      <button class="dpreset" onclick="presetRoll('CON save',1,20,7)">💛 CON save +7</button>
+    </div>
+    <div class="dice-hist-list" id="diceHist"></div>
+  </div>
+</div>
+
 <!-- ENCOUNTER LOG -->
 <div class="card">
   <div class="ch">📋 Encounter Log</div>
@@ -1179,7 +1261,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.9.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v2.0.0</span></footer>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -1766,6 +1848,69 @@ function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)retur
   if(d.npcs){npcs=d.npcs;renderNPCs();}
   if(d.allTimeMan){allTimeMan=d.allTimeMan;}
 }catch(e){}}
+
+// ═══ DICE ROLLER ═══
+let diceHistory=[];
+function quickRoll(sides){
+  document.getElementById('dSides').value=sides;
+  document.getElementById('dNum').value=1;
+  document.getElementById('dMod').value=0;
+  rollDice(1,sides,0,`d${sides}`);
+}
+function customRoll(){
+  const n=Math.min(20,Math.max(1,parseInt(document.getElementById('dNum').value)||1));
+  const s=parseInt(document.getElementById('dSides').value)||10;
+  const m=parseInt(document.getElementById('dMod').value)||0;
+  rollDice(n,s,m,`${n}d${s}${m>0?'+'+m:m<0?m:''}`);
+}
+function presetRoll(label,n,s,m){
+  document.getElementById('dNum').value=n;
+  document.getElementById('dSides').value=s;
+  document.getElementById('dMod').value=m;
+  rollDice(n,s,m,label);
+}
+function rollDice(n,sides,mod,label){
+  const results=Array.from({length:n},()=>Math.floor(Math.random()*sides)+1);
+  const subtotal=results.reduce((a,b)=>a+b,0);
+  const total=subtotal+mod;
+  const bigEl=document.getElementById('diceBig');
+  const formulaEl=document.getElementById('diceFormula');
+  const breakEl=document.getElementById('diceBreakdown');
+  // animate
+  bigEl.className='dice-big';bigEl.textContent='…';
+  let ticks=0;
+  const iv=setInterval(()=>{
+    bigEl.textContent=Math.floor(Math.random()*sides)+1+(ticks>4?mod:0);
+    if(++ticks>=10){
+      clearInterval(iv);
+      bigEl.textContent=total;
+      bigEl.classList.add('popped');
+      if(n===1&&sides===20&&total-mod===20)bigEl.classList.add('nat20');
+      else if(n===1&&sides===20&&total-mod===1)bigEl.classList.add('nat1');
+      setTimeout(()=>bigEl.classList.remove('popped'),400);
+      const formula=`${label}${n>1||label.includes('d')?'':` (${n}d${sides}${mod?'+'+ mod:''})`}`;
+      formulaEl.textContent=formula;
+      const breakdown=results.length>1?`[${results.join(' + ')}]${mod?` + ${mod}`:''} = ${total}`
+        :mod?`${results[0]} ${mod>=0?'+':''} ${mod} = ${total}`:'';
+      breakEl.textContent=breakdown;
+      // log to history
+      const ts=new Date();const tsStr=`${ts.getHours()}:${String(ts.getMinutes()).padStart(2,'0')}`;
+      diceHistory.unshift({ts:tsStr,label:label||`${n}d${sides}`,total,nat:n===1&&sides===20?results[0]:null,mod,breakdown});
+      if(diceHistory.length>12)diceHistory.pop();
+      renderDiceHist();
+      // also log nat20/nat1 to encounter log
+      if(n===1&&sides===20&&results[0]===20)addLog(`🎯 NATURAL 20! ${label||`d20`} → ${total}`);
+      else if(n===1&&sides===20&&results[0]===1)addLog(`💀 Natural 1. ${label||`d20`} → ${total}`);
+    }
+  },55);
+}
+function renderDiceHist(){
+  const el=document.getElementById('diceHist');if(!el)return;
+  el.innerHTML=diceHistory.map(h=>{
+    const special=h.nat===20?'color:var(--green)':h.nat===1?'color:var(--red)':'';
+    return `<div class="dhist"><span style="color:#2a4050">[${h.ts}]</span> <span>${h.label}</span> <span class="dh-val" style="${special}">${h.total}${h.nat===20?' ★':h.nat===1?' ✗':''}</span></div>`;
+  }).join('');
+}
 
 // ═══ INITIATIVE TRACKER ═══
 let initCombatants=[];  // [{name, init, type, hp, dead}]
