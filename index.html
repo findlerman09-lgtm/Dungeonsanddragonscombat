@@ -474,20 +474,27 @@ input.npc-notes:focus{outline:none;border-color:var(--gold);color:var(--text)}
 .dbtn.d20-btn:hover{border-color:var(--blue);background:rgba(61,139,255,.1);color:var(--blue)}
 /* GRAPHICAL DICE */
 .die-display-area{text-align:center;padding:10px 0 8px;min-height:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-#dieSVG{width:112px;height:112px;overflow:visible;transition:filter .35s}
-#dieSVG.nat20{filter:drop-shadow(0 0 12px rgba(16,185,129,.9)) drop-shadow(0 0 24px rgba(16,185,129,.5))}
-#dieSVG.nat1{filter:drop-shadow(0 0 12px rgba(239,68,68,.9)) drop-shadow(0 0 24px rgba(239,68,68,.5))}
-@keyframes dieRoll{
-  0%{transform:rotate(0deg) scale(.75);opacity:.5}
-  15%{transform:rotate(80deg) scale(1.12)}
-  35%{transform:rotate(165deg) scale(.9)}
-  55%{transform:rotate(250deg) scale(1.07)}
-  75%{transform:rotate(320deg) scale(.95)}
-  100%{transform:rotate(360deg) scale(1);opacity:1}
+.die-3d-wrap{perspective:440px;perspective-origin:50% 35%;width:120px;height:120px;display:flex;align-items:center;justify-content:center}
+#dieSVG{width:112px;height:112px;overflow:visible;transform-origin:56px 56px;transition:filter .35s}
+#dieSVG.nat20{filter:drop-shadow(0 0 10px rgba(16,185,129,.95)) drop-shadow(0 0 22px rgba(16,185,129,.5))}
+#dieSVG.nat1{filter:drop-shadow(0 0 10px rgba(239,68,68,.95)) drop-shadow(0 0 22px rgba(239,68,68,.5))}
+@keyframes dieRoll3D{
+  0%  {transform:rotateX(0deg)   rotateY(0deg)   rotateZ(0deg)   scale(.78)}
+  14% {transform:rotateX(100deg) rotateY(55deg)  rotateZ(50deg)  scale(1.08)}
+  28% {transform:rotateX(200deg) rotateY(130deg) rotateZ(-35deg) scale(.88)}
+  43% {transform:rotateX(310deg) rotateY(200deg) rotateZ(75deg)  scale(1.06)}
+  57% {transform:rotateX(410deg) rotateY(260deg) rotateZ(-55deg) scale(.9)}
+  71% {transform:rotateX(510deg) rotateY(320deg) rotateZ(30deg)  scale(1.04)}
+  86% {transform:rotateX(600deg) rotateY(350deg) rotateZ(-15deg) scale(.96)}
+  100%{transform:rotateX(720deg) rotateY(360deg) rotateZ(0deg)   scale(1)}
 }
-@keyframes diePop{0%{transform:scale(.65);opacity:.3}55%{transform:scale(1.13)}100%{transform:scale(1);opacity:1}}
-.die-rolling{animation:dieRoll .38s linear infinite}
-.die-popped{animation:diePop .3s cubic-bezier(.22,1,.36,1)}
+@keyframes diePop{
+  0%  {transform:scale(.5) rotateX(-25deg) rotateZ(-8deg);opacity:.2}
+  55% {transform:scale(1.14) rotateX(4deg) rotateZ(2deg)}
+  100%{transform:scale(1) rotateX(0) rotateZ(0);opacity:1}
+}
+.die-rolling{animation:dieRoll3D .52s cubic-bezier(.4,0,.6,1) infinite}
+.die-popped{animation:diePop .38s cubic-bezier(.22,1,.36,1)}
 .die-formula-lbl{font-size:.7rem;color:var(--muted);font-family:'Roboto Mono',monospace}
 .die-breakdown-lbl{font-size:.66rem;color:#3a4870;font-family:'Roboto Mono',monospace}
 .dice-custom-row{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:11px}
@@ -1059,10 +1066,13 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
     </div>
     <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
       <div class="die-display-area">
-        <svg id="dieSVG" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="60,4 112,34 112,88 60,118 8,88 8,34" fill="rgba(61,139,255,.12)" stroke="#3d8bff" stroke-width="3" stroke-linejoin="round"/>
-          <text x="60" y="64" fill="#3d8bff" font-family="'Roboto Mono',monospace" font-weight="900" font-size="38" text-anchor="middle" dominant-baseline="central">—</text>
-        </svg>
+        <div class="die-3d-wrap">
+          <svg id="dieSVG" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="62,6 114,36 114,90 62,120 10,90 10,36" fill="#3d8bff18" stroke="#3d8bff55" stroke-width="1.5" stroke-linejoin="round"/>
+            <polygon points="60,4 112,34 112,88 60,118 8,88 8,34" fill="#3d8bff18" stroke="#3d8bff" stroke-width="3" stroke-linejoin="round"/>
+            <text x="60" y="64" fill="#3d8bff" font-family="'Roboto Mono',monospace" font-weight="900" font-size="32" text-anchor="middle" dominant-baseline="central">—</text>
+          </svg>
+        </div>
         <div class="die-formula-lbl" id="diceFormula"></div>
         <div class="die-breakdown-lbl" id="diceBreakdown"></div>
       </div>
@@ -1881,40 +1891,76 @@ function presetRoll(label,n,s,m){
   document.getElementById('dMod').value=m;
   rollDice(n,s,m,label);
 }
-// ─── GRAPHICAL DICE ───
+// ─── FLAT-3D GRAPHICAL DICE ───
+// Each die: front polygon + isometric extrusion (back face + side faces).
+// CSS perspective on parent + rotateX/Y/Z keyframes = convincing tumble.
 const DIE_CFG={
-  4: {shape:'polygon',points:'60,8 112,100 8,100',color:'#06b6d4',textY:72},
-  6: {shape:'rect',x:16,y:16,w:88,h:88,rx:10,color:'#10b981',textY:64},
-  8: {shape:'polygon',points:'60,6 114,60 60,114 6,60',color:'#a855f7',textY:64},
-  10:{shape:'polygon',points:'60,6 110,58 60,116 10,58',color:'#a855f7',textY:68},
-  12:{shape:'polygon',points:'60,4 114,42 94,108 26,108 6,42',color:'#f59e0b',textY:68},
-  20:{shape:'polygon',points:'60,4 112,34 112,88 60,118 8,88 8,34',color:'#3d8bff',textY:64},
-  100:{shape:'circle',cx:60,cy:60,r:54,color:'#d4a017',textY:64},
+  4:  {pts:'60,8 112,100 8,100',    col:'#06b6d4',ty:72,  dp:9},
+  6:  {iso:true,                     col:'#10b981'},
+  8:  {pts:'60,6 114,60 60,114 6,60',col:'#a855f7',ty:64, dp:10},
+  10: {pts:'60,6 110,58 60,116 10,58',col:'#a855f7',ty:68,dp:10},
+  12: {pts:'60,4 114,42 94,108 26,108 6,42',col:'#f59e0b',ty:68,dp:9},
+  20: {pts:'60,4 112,34 112,88 60,118 8,88 8,34',col:'#3d8bff',ty:64,dp:10},
+  100:{circ:true,cx:60,cy:60,r:53,  col:'#d4a017',ty:64, dp:9},
 };
-const D6_PIPS={
-  1:[[60,60]],
-  2:[[38,38],[82,82]],
-  3:[[38,38],[60,60],[82,82]],
-  4:[[38,38],[82,38],[38,82],[82,82]],
-  5:[[38,38],[82,38],[60,60],[38,82],[82,82]],
-  6:[[38,35],[82,35],[38,60],[82,60],[38,85],[82,85]],
+// Pip positions on the isometric top-face rhombus (screen coords)
+const ISO_PIPS={
+  1:[[60,32]],
+  2:[[43,24],[77,40]],
+  3:[[43,22],[60,32],[77,42]],
+  4:[[43,22],[77,22],[43,42],[77,42]],
+  5:[[43,22],[77,22],[60,32],[43,42],[77,42]],
+  6:[[43,20],[77,20],[43,32],[77,32],[43,44],[77,44]],
 };
+function _parsePts(s){return s.trim().split(/\s+/).map(p=>p.split(',').map(Number))}
+function _ptsStr(arr){return arr.map(([x,y])=>`${x},${y}`).join(' ')}
+function _extrudePts(arr,dx,dy){return arr.map(([x,y])=>[x+dx,y+dy])}
+
+function buildIsoCube(val,col){
+  // 3-face isometric cube: top (bright), right (mid), left (dark)
+  const tp='60,12 96,32 60,52 24,32';
+  const lp='24,32 24,72 60,92 60,52';
+  const rp='96,32 60,52 60,92 96,72';
+  const pips=(ISO_PIPS[val]||[]).map(([px,py])=>`<circle cx="${px}" cy="${py}" r="5" fill="${col}"/>`).join('');
+  return `<polygon points="${lp}" fill="${col}28" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="${rp}" fill="${col}50" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="${tp}" fill="${col}cc" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
+${pips}`;
+}
+
+function buildExtruded(c,val,col){
+  // Isometric extrusion offset (right+down at 30°)
+  const dx=Math.round((c.dp||9)*0.87), dy=Math.round((c.dp||9)*0.50);
+  const fs=val>99?'20':val>9?'28':'36';
+  const txt=`<text x="60" y="${c.ty||64}" fill="${col}" font-family="'Roboto Mono',monospace" font-weight="900" font-size="${fs}" text-anchor="middle" dominant-baseline="central">${val??'?'}</text>`;
+
+  if(c.circ){
+    return `<ellipse cx="${c.cx+dx}" cy="${c.cy+dy}" rx="${c.r}" ry="${c.r}" fill="${col}22" stroke="${col}40" stroke-width="1.5"/>
+<circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" fill="${col}18" stroke="${col}" stroke-width="3"/>
+${txt}`;
+  }
+
+  const front=_parsePts(c.pts), n=front.length;
+  const back=_extrudePts(front,dx,dy);
+  // Side faces: connect each front edge to its back counterpart
+  let sides='';
+  for(let i=0;i<n;i++){
+    const j=(i+1)%n;
+    const [x1,y1]=front[i],[x2,y2]=front[j],[bx1,by1]=back[i],[bx2,by2]=back[j];
+    sides+=`<polygon points="${x1},${y1} ${bx1},${by1} ${bx2},${by2} ${x2},${y2}" fill="${col}1e" stroke="${col}30" stroke-width="1"/>`;
+  }
+  return `<polygon points="${_ptsStr(back)}" fill="${col}18" stroke="${col}38" stroke-width="1.5" stroke-linejoin="round"/>
+${sides}
+<polygon points="${c.pts}" fill="${col}1a" stroke="${col}" stroke-width="3" stroke-linejoin="round"/>
+${txt}`;
+}
+
 function buildDieFace(sides,value,glow){
   const c=DIE_CFG[sides]||DIE_CFG[20];
-  const col=glow==='nat20'?'#10b981':glow==='nat1'?'#ef4444':c.color;
-  let shape='';
-  if(c.shape==='polygon')shape=`<polygon points="${c.points}" fill="${col}1a" stroke="${col}" stroke-width="3.5" stroke-linejoin="round"/>`;
-  else if(c.shape==='rect')shape=`<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="${c.rx}" fill="${col}1a" stroke="${col}" stroke-width="3.5"/>`;
-  else shape=`<circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" fill="${col}1a" stroke="${col}" stroke-width="3.5"/>`;
-  let content='';
-  if(sides===6&&value>=1&&value<=6){
-    content=(D6_PIPS[value]||[]).map(([px,py])=>`<circle cx="${px}" cy="${py}" r="7" fill="${col}"/>`).join('');
-  } else {
-    const fs=value>99?'22':value>9?'30':'38';
-    content=`<text x="60" y="${c.textY}" fill="${col}" font-family="'Roboto Mono',monospace" font-weight="900" font-size="${fs}" text-anchor="middle" dominant-baseline="central">${value??'?'}</text>`;
-  }
-  return shape+content;
+  const col=glow==='nat20'?'#10b981':glow==='nat1'?'#ef4444':c.col;
+  return c.iso ? buildIsoCube(value,col) : buildExtruded(c,value,col);
 }
+
 function rollDice(n,sides,mod,label){
   const results=Array.from({length:n},()=>Math.floor(Math.random()*sides)+1);
   const subtotal=results.reduce((a,b)=>a+b,0);
@@ -1922,37 +1968,33 @@ function rollDice(n,sides,mod,label){
   const svg=document.getElementById('dieSVG');
   const formulaEl=document.getElementById('diceFormula');
   const breakEl=document.getElementById('diceBreakdown');
-  // start rolling
   svg.className='die-rolling';
   svg.innerHTML=buildDieFace(sides,Math.floor(Math.random()*sides)+1,'');
   formulaEl.textContent=''; breakEl.textContent='';
   let ticks=0;
   const iv=setInterval(()=>{
-    const randVal=Math.floor(Math.random()*sides)+1;
-    svg.innerHTML=buildDieFace(sides,randVal,'');
+    svg.innerHTML=buildDieFace(sides,Math.floor(Math.random()*sides)+1,'');
     if(++ticks>=10){
       clearInterval(iv);
       const isNat20=n===1&&sides===20&&results[0]===20;
-      const isNat1=n===1&&sides===20&&results[0]===1;
+      const isNat1 =n===1&&sides===20&&results[0]===1;
       const glow=isNat20?'nat20':isNat1?'nat1':'';
-      // show single-die value for 1-die rolls, total for multi-die
       const displayVal=n===1?results[0]:total;
       svg.className='die-popped'+(glow?' '+glow:'');
       svg.innerHTML=buildDieFace(sides,displayVal,glow);
-      setTimeout(()=>{
-        if(svg.className.includes('die-popped'))svg.classList.remove('die-popped');
-      },400);
-      const formula=`${label}${n>1||label.includes('d')?'':` (${n}d${sides}${mod?'+'+ mod:''})`}`;
-      formulaEl.textContent=formula+(mod&&n===1?`  →  ${total}`:'');
-      const breakdown=results.length>1?`[${results.join(' + ')}]${mod?` + ${mod}`:''} = ${total}`
+      setTimeout(()=>svg.classList.remove('die-popped'),450);
+      formulaEl.textContent=`${label}${mod&&n===1?`  →  ${total}`:''}`;
+      const breakdown=results.length>1
+        ?`[${results.join(' + ')}]${mod?` + ${mod}`:''} = ${total}`
         :mod?`${results[0]} ${mod>=0?'+':''} ${mod} = ${total}`:'';
       breakEl.textContent=breakdown;
-      const ts=new Date();const tsStr=`${ts.getHours()}:${String(ts.getMinutes()).padStart(2,'0')}`;
+      const ts=new Date();
+      const tsStr=`${ts.getHours()}:${String(ts.getMinutes()).padStart(2,'0')}`;
       diceHistory.unshift({ts:tsStr,label:label||`${n}d${sides}`,total,nat:n===1&&sides===20?results[0]:null,mod,breakdown});
       if(diceHistory.length>12)diceHistory.pop();
       renderDiceHist();
-      if(isNat20)addLog(`🎯 NATURAL 20! ${label||`d20`} → ${total}`);
-      else if(isNat1)addLog(`💀 Natural 1. ${label||`d20`} → ${total}`);
+      if(isNat20)addLog(`🎯 NATURAL 20! ${label||'d20'} → ${total}`);
+      else if(isNat1)addLog(`💀 Natural 1. ${label||'d20'} → ${total}`);
     }
   },55);
 }
