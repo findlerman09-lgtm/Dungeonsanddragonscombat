@@ -255,6 +255,53 @@ input.adjin{width:50px;background:rgba(255,255,255,.04);border:1px solid var(--b
 .abtn:hover{background:var(--border2)}
 .acount{font-size:1rem;font-weight:900;min-width:24px;text-align:center;color:var(--gold);font-family:'Roboto Mono',monospace}
 
+/* PRE-COMBAT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.hidden{display:none}
+.modal{background:linear-gradient(135deg,#0f1525,#111827);border:1px solid rgba(212,160,23,.35);border-radius:14px;
+  width:min(540px,94vw);max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h2{font-family:'Rajdhani',sans-serif;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;padding:2px 8px;border-radius:4px;transition:color .2s}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:16px 20px}
+.checklist-step{border-radius:9px;border:1px solid var(--border);padding:12px 14px;margin-bottom:10px;
+  display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+.checklist-step:hover{border-color:var(--border2)}
+.checklist-step.done{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.06)}
+.step-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .2s}
+.checklist-step.done .step-check{background:var(--green);border-color:var(--green);color:#000}
+.step-body{flex:1}
+.step-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.92rem;margin-bottom:3px;letter-spacing:.3px}
+.step-desc{font-size:.76rem;color:#8899bb;line-height:1.5}
+.step-desc strong{color:var(--gold2)}
+.step-action{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.modal-progress{font-size:.72rem;color:var(--muted);align-self:center;margin-right:auto;font-family:'Roboto Mono',monospace}
+
+/* VEX VISUALIZER */
+.vex-viz{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.25);border-radius:9px;padding:10px 12px;margin-bottom:10px}
+.vex-viz-title{font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.vex-target{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(168,85,247,.12)}
+.vex-target:last-child{border-bottom:none}
+.vex-target-name{flex:1;font-size:.82rem;font-weight:600;color:var(--text);font-family:'Rajdhani',sans-serif}
+.vex-target-name.empty{color:var(--muted);font-style:italic;font-weight:400}
+.vex-turns{display:flex;gap:3px}
+.vturn{width:18px;height:18px;border-radius:3px;border:1.5px solid rgba(168,85,247,.3);font-size:.58rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Roboto Mono',monospace;
+  color:rgba(168,85,247,.4);transition:all .25s}
+.vturn.live{border-color:var(--purple);background:var(--purple);color:#fff;box-shadow:0 0 8px rgba(168,85,247,.5)}
+.vturn.expiring{border-color:var(--amber);background:var(--amber);color:#000;box-shadow:0 0 8px rgba(245,158,11,.5);animation:vPulse 1s infinite}
+@keyframes vPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.vex-adv-badge{font-size:.6rem;padding:1px 7px;border-radius:8px;font-weight:700;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+.vex-adv-badge.active{background:rgba(168,85,247,.2);color:var(--purple);border:1px solid rgba(168,85,247,.4)}
+.vex-adv-badge.inactive{background:transparent;color:#2a3555;border:1px solid #1e2d50}
+.vex-use-btn{font-size:.62rem;padding:2px 8px;border-radius:5px;border:1px solid rgba(168,85,247,.3);
+  background:transparent;color:var(--purple);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;transition:all .2s}
+.vex-use-btn:hover{background:rgba(168,85,247,.15)}
+
 /* ENEMY TRACKER */
 .enemy-slot{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px}
 .enemy-slot:last-child{margin-bottom:0}
@@ -331,6 +378,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
     <p>Fighter 11 · Battle Master · Variant Human · Criminal · Lawful Good</p>
   </div>
   <div class="hpills">
+    <button class="btn" style="background:linear-gradient(135deg,rgba(212,160,23,.25),rgba(239,68,68,.15));border:1px solid rgba(212,160,23,.5);color:var(--gold2);font-family:'Rajdhani',sans-serif;letter-spacing:1px;font-size:.75rem;padding:5px 14px" onclick="openPreCombat()">⚔ Start Encounter</button>
     <div class="hpill">AC <strong>21</strong></div>
     <div class="hpill">Init <strong>+9</strong></div>
     <div class="hpill">Speed <strong>30 ft</strong></div>
@@ -686,45 +734,131 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 <!-- ═══ RIGHT ═══ -->
 <div class="rpanel">
 
+<!-- PRE-COMBAT MODAL -->
+<div class="modal-overlay hidden" id="preCombatModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>⚔ Pre-Combat Checklist</h2>
+      <button class="modal-close" onclick="closePreCombat()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:.76rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Work through these before initiative is called. Click each step to mark it done.</div>
+
+      <div class="checklist-step" id="pcs-0" onclick="toggleStep(0)">
+        <div class="step-check">✓</div>
+        <div class="step-body">
+          <div class="step-title">🎲 Roll Initiative (+9)</div>
+          <div class="step-desc">Roll d20 + <strong>9</strong> (DEX +5, Alert +4). <strong>Initiative Swap:</strong> immediately after rolling you can swap your result with one willing ally — bump your best striker to the top, or rescue your healer from a low roll.</div>
+        </div>
+      </div>
+
+      <div class="checklist-step" id="pcs-1" onclick="toggleStep(1)">
+        <div class="step-check">✓</div>
+        <div class="step-body">
+          <div class="step-title">🎯 Ambush? (+1d10 to Initiative or Stealth)</div>
+          <div class="step-desc">Spend <strong>1 Superiority Die</strong> to add 1d10 to your Initiative or a Stealth check. Best used when the margin matters — don't burn SD for a roll you'd win anyway.</div>
+          <div class="step-action">
+            <button class="btn bgray" style="font-size:.7rem" onclick="event.stopPropagation();spendSDFor('Ambush (initiative)');toggleStep(1,true)">Spend 1 SD</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-step" id="pcs-2" onclick="toggleStep(2)">
+        <div class="step-check">✓</div>
+        <div class="step-body">
+          <div class="step-title">☠ Apply Poison?</div>
+          <div class="step-desc">Applying in combat costs your <strong>first Bonus Action</strong>. Apply before initiative if possible. <strong>Effect:</strong> on hit, DC 17 Con save or 2d8 Poison + Poisoned condition. Lasts 10 rounds. Potent Poison ignores Resistance.</div>
+          <div class="step-action">
+            <button class="btn bgray" style="font-size:.7rem" onclick="event.stopPropagation();if(!S.poisonActive){togglePoison();toggleStep(2,true);}">Apply Poison</button>
+            <span id="pcPoisonStatus" style="font-size:.72rem;color:var(--green);align-self:center;display:none">☠ Applied!</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-step" id="pcs-3" onclick="toggleStep(3)">
+        <div class="step-check">✓</div>
+        <div class="step-body">
+          <div class="step-title">🔍 Know Your Enemy on Priority Target</div>
+          <div class="step-desc">Use on Turn 1 Bonus Action if not used for poison. Learn immunities/resistances/vulns of the biggest threat within 30 ft. Decides: is poison worth it? Which weapon/damage type to use? Restore with 1 SD (no action) if needed.</div>
+          <div class="step-action">
+            <button class="btn bgray" style="font-size:.7rem" onclick="event.stopPropagation();markKYEUsed()">Mark KYE Used</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-step" id="pcs-4" onclick="toggleStep(4)">
+        <div class="step-check">✓</div>
+        <div class="step-body">
+          <div class="step-title">⚡ Action Surge — Save or Open Hot?</div>
+          <div class="step-desc">Save for a <strong>6-attack burst round</strong> when a priority target needs to die fast, or open with it on Turn 1 if surprise/range gives an advantage window. Don't waste it when you're already winning.</div>
+        </div>
+      </div>
+
+      <div class="checklist-step" id="pcs-5" onclick="toggleStep(5)">
+        <div class="step-check">✓</div>
+        <div class="step-body">
+          <div class="step-title">🗡 Loadout Check</div>
+          <div class="step-desc"><strong>Melee:</strong> Rapier +10 · Vex chains · 1d8+6.<br><strong>Ranged:</strong> Pistol +9 · Vex · 1d10+5 · Gunner (no Disadv in melee).<br><strong>Nick loadout:</strong> Two daggers = 4 attacks per Action.<br><strong>⚠ Rapier+Dagger = Nick inactive</strong> (Rapier not Light).</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <span class="modal-progress" id="pcProgress">0 / 6 done</span>
+      <button class="btn bgray" onclick="resetChecklist()">Reset</button>
+      <button class="btn bsr" onclick="closePreCombat()">Go to Combat →</button>
+    </div>
+  </div>
+</div>
+
+<!-- VEX CHAIN VISUALIZER -->
+<div class="card">
+  <div class="ch">🟣 Vex Chain Tracker</div>
+  <div class="cb">
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Hit with Vex → advantage on your <strong>next single attack roll</strong> vs. that target, window until end of <strong>your next turn</strong>. Land Vex as your last attack → carry advantage into next turn's opener.</div>
+    <div id="vexViz"></div>
+  </div>
+</div>
+
 <!-- ENEMY TRACKER -->
 <div class="card">
   <div class="ch">👁 Enemy Tracker</div>
   <div class="cb">
 
-    <div class="enemy-slot">
+    <div class="enemy-slot" data-enemy="0">
       <div class="e-label">TANGO 01 <button class="btn bgray" style="font-size:.58rem;padding:2px 6px" onclick="clearEnemy(this.closest('.enemy-slot'))">CLEAR</button></div>
-      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…"><input class="ehp" type="number" placeholder="HP" min="0"></div>
+      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…" oninput="syncVexNames()"><input class="ehp" type="number" placeholder="HP" min="0"></div>
       <div class="econd-row">
-        <span class="ec vex" onclick="this.classList.toggle('vex')">Vex ▲</span>
+        <span class="ec vex" onclick="toggleVexCond(this,0)">Vex ▲</span>
         <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
-        <span class="ec poison" onclick="this.classList.toggle('poison')">Poisoned</span>
-        <span class="ec" onclick="this.classList.toggle('on')">Sapped</span>
+        <span class="ec poison" onclick="togglePoisonCond(this)">Poisoned</span>
+        <span class="ec" onclick="toggleSap(this)">Sapped</span>
         <span class="ec" onclick="this.classList.toggle('on')">Disarmed</span>
         <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>
     </div>
 
-    <div class="enemy-slot">
+    <div class="enemy-slot" data-enemy="1">
       <div class="e-label">TANGO 02 <button class="btn bgray" style="font-size:.58rem;padding:2px 6px" onclick="clearEnemy(this.closest('.enemy-slot'))">CLEAR</button></div>
-      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…"><input class="ehp" type="number" placeholder="HP" min="0"></div>
+      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…" oninput="syncVexNames()"><input class="ehp" type="number" placeholder="HP" min="0"></div>
       <div class="econd-row">
-        <span class="ec vex" onclick="this.classList.toggle('vex')">Vex ▲</span>
+        <span class="ec vex" onclick="toggleVexCond(this,1)">Vex ▲</span>
         <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
-        <span class="ec poison" onclick="this.classList.toggle('poison')">Poisoned</span>
-        <span class="ec" onclick="this.classList.toggle('on')">Sapped</span>
+        <span class="ec poison" onclick="togglePoisonCond(this)">Poisoned</span>
+        <span class="ec" onclick="toggleSap(this)">Sapped</span>
         <span class="ec" onclick="this.classList.toggle('on')">Disarmed</span>
         <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>
     </div>
 
-    <div class="enemy-slot">
+    <div class="enemy-slot" data-enemy="2">
       <div class="e-label">TANGO 03 <button class="btn bgray" style="font-size:.58rem;padding:2px 6px" onclick="clearEnemy(this.closest('.enemy-slot'))">CLEAR</button></div>
-      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…"><input class="ehp" type="number" placeholder="HP" min="0"></div>
+      <div class="e-header"><input class="ename" type="text" placeholder="Name / Type…" oninput="syncVexNames()"><input class="ehp" type="number" placeholder="HP" min="0"></div>
       <div class="econd-row">
-        <span class="ec vex" onclick="this.classList.toggle('vex')">Vex ▲</span>
+        <span class="ec vex" onclick="toggleVexCond(this,2)">Vex ▲</span>
         <span class="ec" onclick="this.classList.toggle('on')">Prone</span>
-        <span class="ec poison" onclick="this.classList.toggle('poison')">Poisoned</span>
-        <span class="ec" onclick="this.classList.toggle('on')">Sapped</span>
+        <span class="ec poison" onclick="togglePoisonCond(this)">Poisoned</span>
+        <span class="ec" onclick="toggleSap(this)">Sapped</span>
         <span class="ec" onclick="this.classList.toggle('on')">Disarmed</span>
         <span class="ec" onclick="this.classList.toggle('on')">Blinded</span>
       </div>
@@ -809,7 +943,9 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 const S={hp:98,maxHp:98,sd:5,sw:4,as:1,ind:1,kye:1,hd:11,poisonActive:false,round:1,turn:1};
 let logE=[];
 
-function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();runAdvisor();}
+function init(){renderSD();renderPips('swP',S.sw,4);renderPips('asP',S.as,1);renderPips('inP',S.ind,1);renderPips('kyP',S.kye,1);renderHD();updateHP();updateCombos();renderVexViz();runAdvisor();}
+// close modal on overlay click
+document.addEventListener('click',e=>{const m=document.getElementById('preCombatModal');if(m&&e.target===m)closePreCombat();});
 
 // PIPS
 function renderPips(id,cur,max){
@@ -859,18 +995,100 @@ function spendSlot(id){const el=document.getElementById(id);el.classList.toggle(
 function useSurge(){if(S.as<=0){toast('Action Surge already spent!');return;}
   S.as=0;renderPips('asP',0,1);document.getElementById('surgeLabel').textContent='SPENT';
   document.getElementById('sl-surge').classList.add('spent');addLog('ACTION SURGE used');runAdvisor();updateCombos();toast('⚡ Action Surge! Extra action this turn (not Magic action).');}
+// VEX STATE: per enemy { turns: 0|1|2, used: bool }
+// turns=2 means just applied this turn (full window), turns=1 means expiring (end of next turn), turns=0 = gone
+const vexState=[{turns:0,used:false},{turns:0,used:false},{turns:0,used:false}];
+function toggleVexCond(el,idx){
+  el.classList.toggle('vex');
+  if(el.classList.contains('vex')){vexState[idx]={turns:2,used:false};addLog(`Vex applied to Tango 0${idx+1}`);}
+  else{vexState[idx]={turns:0,used:false};}
+  renderVexViz();runAdvisor();
+}
+function useVexAdv(idx){
+  vexState[idx].used=true;vexState[idx].turns=0;
+  // clear the chip on enemy slot
+  const slot=document.querySelector(`.enemy-slot[data-enemy="${idx}"]`);
+  if(slot){const vChip=slot.querySelector('.ec.vex');if(vChip)vChip.classList.remove('vex');}
+  addLog(`Vex advantage USED on Tango 0${idx+1}`);renderVexViz();runAdvisor();
+}
+function togglePoisonCond(el){el.classList.toggle('poison');}
+function toggleSap(el){
+  // Sap expires start of YOUR next turn — flag it
+  el.classList.toggle('on');
+  if(el.classList.contains('on')){el.dataset.sap='1';addLog('Sap applied — enemy has Disadv on next attack');}
+  else delete el.dataset.sap;
+}
+function syncVexNames(){renderVexViz();}
+function renderVexViz(){
+  const container=document.getElementById('vexViz');if(!container)return;
+  const names=[...document.querySelectorAll('.enemy-slot .ename')].map(i=>i.value.trim()||null);
+  const hasAny=vexState.some(v=>v.turns>0);
+  if(!hasAny&&names.every(n=>!n)){container.innerHTML=`<div style="font-size:.76rem;color:var(--muted);text-align:center;padding:8px;font-style:italic">No Vex active. Hit a target with Rapier, Pistol, or Dart to apply.</div>`;return;}
+  container.innerHTML='';
+  vexState.forEach((v,i)=>{
+    const name=names[i]||`Tango 0${i+1}`;
+    const row=document.createElement('div');row.className='vex-target';
+    // turn pips: 2 boxes representing the window
+    const pips=[0,1].map(p=>{const d=document.createElement('div');d.className='vturn';
+      if(v.turns===2&&p===0){d.className='vturn live';d.title='Current turn window';}
+      else if(v.turns===2&&p===1){d.className='vturn live';d.title='Next turn window';}
+      else if(v.turns===1&&p===0){d.className='vturn expiring';d.title='Expiring — use this turn!';}
+      else if(v.turns===1&&p===1){d.className='vturn';} // already past
+      d.textContent=p===0?'T':'T+1';return d;}).reduce((f,d)=>{const w=document.createElement('div');w.className='vex-turns';w.appendChild(pips?.[0]||d);return w;},null);
+
+    // simpler: build the HTML directly
+    const turnsHTML=()=>{
+      if(v.turns===0)return `<div class="vex-turns"><div class="vturn">T</div><div class="vturn">T+1</div></div>`;
+      if(v.turns===2)return `<div class="vex-turns"><div class="vturn live" title="Vex window open">T</div><div class="vturn live" title="Carries to next turn">T+1</div></div>`;
+      if(v.turns===1)return `<div class="vex-turns"><div class="vturn expiring" title="Expiring — use NOW">T</div><div class="vturn">—</div></div>`;
+      return '';
+    };
+    const badgeHTML=v.turns>0?`<span class="vex-adv-badge active">ADV READY</span>`:`<span class="vex-adv-badge inactive">inactive</span>`;
+    const useBtn=v.turns>0?`<button class="vex-use-btn" onclick="useVexAdv(${i})">Mark Used</button>`:'';
+    row.innerHTML=`<div class="vex-target-name${v.turns===0?' empty':''}">${name}</div>${turnsHTML()}${badgeHTML}${useBtn}`;
+    container.appendChild(row);
+  });
+}
+
 function newTurn(){
   ['sl-a','sl-b','sl-r','sl-m','sl-o'].forEach(id=>document.getElementById(id).classList.remove('spent'));
   document.querySelectorAll('.atkp').forEach(p=>p.classList.remove('u'));
   document.querySelectorAll('.man.used').forEach(m=>{m.classList.remove('used');const b=m.querySelector('.man-badge');if(b)b.remove();});
+  // Sap expires at START of your turn
+  document.querySelectorAll('.ec.on[data-sap]').forEach(el=>{el.classList.remove('on');delete el.dataset.sap;addLog('Sap expired');});
+  // Vex: tick down — turns 2→1→0
+  let vexMsg=[];
+  vexState.forEach((v,i)=>{
+    if(v.turns===2){v.turns=1;vexMsg.push(`Vex on Tango 0${i+1} expiring this turn`);}
+    else if(v.turns===1){v.turns=0;const slot=document.querySelector(`.enemy-slot[data-enemy="${i}"]`);if(slot){const vc=slot.querySelector('.ec.vex');if(vc)vc.classList.remove('vex');}vexMsg.push(`Vex on Tango 0${i+1} expired`);}
+  });
+  if(vexMsg.length)vexMsg.forEach(m=>addLog(m));
+  renderVexViz();
   // poison countdown
   const pr=document.getElementById('prA');const prv=parseInt(pr.textContent)||0;
   if(S.poisonActive&&prv>0){pr.textContent=prv-1;if(prv-1<=0){S.poisonActive=false;updatePoisonUI();toast('☠ Poison wore off.');}}
+  // Poisoned condition expires end of your next turn (approx: clear on new turn if flagged)
+  document.querySelectorAll('.ec.poison[data-expiring]').forEach(el=>{el.classList.remove('poison');delete el.dataset.expiring;addLog('Enemy Poisoned condition expired');});
+  document.querySelectorAll('.ec.poison').forEach(el=>el.dataset.expiring='1');
   S.turn++;addLog(`── Turn ${S.turn} ──`);runAdvisor();
 }
 function newRound(){S.round++;S.turn=1;
-  document.querySelectorAll('.ec.vex').forEach(e=>{e.classList.add('vex');});
   newTurn();addLog(`══ Round ${S.round} ══`);toast(`Round ${S.round}.`);}
+
+// PRE-COMBAT
+const pcSteps=Array(6).fill(false);
+function openPreCombat(){resetChecklist();document.getElementById('preCombatModal').classList.remove('hidden');if(S.poisonActive)document.getElementById('pcPoisonStatus').style.display='inline';}
+function closePreCombat(){document.getElementById('preCombatModal').classList.add('hidden');}
+function toggleStep(idx,force){
+  pcSteps[idx]=force!==undefined?force:!pcSteps[idx];
+  const el=document.getElementById('pcs-'+idx);if(!el)return;
+  el.classList.toggle('done',pcSteps[idx]);
+  const done=pcSteps.filter(Boolean).length;
+  document.getElementById('pcProgress').textContent=`${done} / 6 done`;
+}
+function resetChecklist(){pcSteps.fill(false);for(let i=0;i<6;i++){const el=document.getElementById('pcs-'+i);if(el)el.classList.remove('done');}document.getElementById('pcProgress').textContent='0 / 6 done';}
+function spendSDFor(name){if(S.sd<=0){toast('No SD!');return;}S.sd=Math.max(0,S.sd-1);renderSD();document.getElementById('sdNum').textContent=S.sd;addLog(`Maneuver: ${name} (SD spent, ${S.sd} left)`);runAdvisor();updateCombos();}
+function markKYEUsed(){if(S.kye<=0){toast('Know Your Enemy already used!');return;}S.kye=0;renderPips('kyP',0,1);addLog('Know Your Enemy used');toggleStep(3,true);runAdvisor();updateCombos();}
 
 // RESTS
 function shortRest(){S.sd=5;S.as=1;renderSD();renderPips('asP',1,1);
@@ -922,9 +1140,11 @@ function runAdvisor(){
 
   if(S.as>0&&sd>=1&&pct>0.4){adv.push({p:'high',i:'⚡',l:'BURST WINDOW',t:`<strong>Action Surge</strong> available with ${sd} SD. Prime <strong>Maximum Burst</strong> turn: Attack ×3, then Action Surge for 3 more. Add <strong>Lunging Attack</strong> SD on your best melee hit (+1d10 dmg). 6 attacks total.`});}
 
-  // Vex chip check
-  const vChip=[...document.querySelectorAll('.chip')].find(c=>c.textContent.includes('Vex Adv'));
-  if(vChip&&vChip.classList.contains('buff')){adv.push({p:'med',i:'🟣',l:'VEX ADVANTAGE ACTIVE',t:`Advantage on your <strong>next attack roll</strong> vs. the Vexed target (window: until end of your next turn). Use it on your highest-damage hit — Rapier +10 for 1d8+6. Advantage = <strong>don't waste it</strong>.`});}
+  // Vex state check
+  const expiring=vexState.filter(v=>v.turns===1);
+  const live=vexState.filter(v=>v.turns===2);
+  if(expiring.length>0){adv.push({p:'high',i:'🟣',l:'VEX EXPIRING THIS TURN',t:`Vex advantage expires at end of this turn for ${expiring.length} target(s). <strong>Use it now</strong> — attack with Advantage before it's gone. Rapier +10 (1d8+6) or Pistol +9 (1d10+5). Mark Used on the Vex tracker after.`});}
+  else if(live.length>0){adv.push({p:'med',i:'🟣',l:'VEX ADVANTAGE ACTIVE',t:`Vex is live on ${live.length} target(s) — advantage on your <strong>next single attack roll</strong> vs. each. Window carries until end of your next turn. End this turn with a Vex hit to chain advantage into next turn's opener.`});}
 
   if(sd===1){adv.push({p:'med',i:'⚠️',l:'LAST SUPERIORITY DIE',t:`Only <strong>1 SD remaining</strong>. Save it for <strong>Parry (DEX)</strong> — reduces melee damage by 1d10+5 as a Reaction. Spend it offensively only if the fight is nearly over.`});}
   else if(sd===0){adv.push({p:'high',i:'🔴',l:'NO SUPERIORITY DICE',t:`All SD spent. Maneuvers are offline. Focus raw weapon attacks and Vex chains. Take a <strong>Short Rest</strong> ASAP to restore all 5.`});}
