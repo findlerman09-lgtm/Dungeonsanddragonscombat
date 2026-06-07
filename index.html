@@ -411,10 +411,27 @@ input.ethreat:focus{outline:none;border-color:var(--gold)}
 .threat-display{flex:1;display:flex;gap:8px;flex-wrap:wrap;font-size:.65rem;font-family:'Roboto Mono',monospace}
 
 /* ROLEPLAY */
-textarea.rp-ta{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;
-  color:var(--text);padding:6px 8px;font-size:.75rem;font-family:'Inter',sans-serif;
-  resize:vertical;line-height:1.45;min-height:34px}
-textarea.rp-ta:focus{outline:none;border-color:var(--gold)}
+.spark-display{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.2);border-radius:9px;
+  padding:12px 14px;margin-bottom:10px;min-height:72px;position:relative;cursor:pointer;transition:border-color .2s}
+.spark-display:hover{border-color:rgba(212,160,23,.4)}
+.spark-category{font-size:.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:5px;font-family:'Rajdhani',sans-serif}
+.spark-text{font-size:.82rem;color:var(--text);line-height:1.55;font-style:italic}
+.spark-sub{font-size:.68rem;color:var(--muted);margin-top:5px;line-height:1.4}
+.spark-sub strong{color:var(--gold2)}
+.spark-hint{font-size:.6rem;color:#2a3a5a;position:absolute;bottom:6px;right:10px;font-family:'Rajdhani',sans-serif}
+.voice-cat{font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  margin:10px 0 5px;font-family:'Rajdhani',sans-serif}
+.voice-lines{display:flex;flex-direction:column;gap:3px}
+.vline{font-size:.78rem;color:#8899bb;padding:4px 8px;border-radius:5px;cursor:pointer;
+  border:1px solid transparent;transition:all .15s;font-style:italic;line-height:1.4}
+.vline:hover{background:rgba(255,255,255,.04);border-color:var(--border);color:var(--text)}
+.vline.picked{background:rgba(212,160,23,.08);border-color:rgba(212,160,23,.25);color:var(--gold2)}
+.tension-item{padding:8px 10px;margin-bottom:6px;border-left:3px solid var(--purple);
+  background:rgba(168,85,247,.04);border-radius:0 6px 6px 0;cursor:pointer;transition:all .2s}
+.tension-item:hover{background:rgba(168,85,247,.08)}
+.tension-q{font-size:.8rem;color:var(--text);line-height:1.45;margin-bottom:3px}
+.tension-tag{font-size:.58rem;color:var(--purple);font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px}
 .npc-row{display:flex;gap:5px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
 .npc-row:last-child{border-bottom:none}
 input.npc-name{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:5px;
@@ -635,25 +652,94 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 </div>
 
 <div class="card">
-  <div class="ch coll-toggle" onclick="toggleColl('rp-body',this)">🎭 Roleplay Aids <span class="coll-arrow">▾</span></div>
+  <div class="ch coll-toggle" onclick="toggleColl('rp-body',this)">🎭 Roleplay Sparks <span class="coll-arrow">▾</span></div>
   <div class="cb coll-body" id="rp-body">
     <div class="tabs" id="rp-tabs">
-      <div class="tab active" onclick="showRpTab('character')">Character</div>
+      <div class="tab active" onclick="showRpTab('sparks')">Sparks</div>
+      <div class="tab" onclick="showRpTab('voice')">Voice</div>
+      <div class="tab" onclick="showRpTab('tension')">Tension</div>
       <div class="tab" onclick="showRpTab('npcs')">NPCs</div>
     </div>
-    <div id="rpt-character" style="padding:10px 0">
-      <div style="font-size:.67rem;color:var(--muted);margin-bottom:8px">Fill in from your sheet. Saved automatically.</div>
-      <div style="margin-bottom:7px"><div class="hp-lbl">Personality Traits</div>
-        <textarea class="rp-ta" id="rp-traits" rows="2" placeholder="e.g. Always calm, never raises voice. Always has a plan when things go wrong."></textarea></div>
-      <div style="margin-bottom:7px"><div class="hp-lbl">Ideal</div>
-        <textarea class="rp-ta" id="rp-ideal" rows="1" placeholder="What core value drives Sergio?"></textarea></div>
-      <div style="margin-bottom:7px"><div class="hp-lbl">Bond</div>
-        <textarea class="rp-ta" id="rp-bond" rows="1" placeholder="Who or what does he protect or owe?"></textarea></div>
-      <div style="margin-bottom:7px"><div class="hp-lbl">Flaw</div>
-        <textarea class="rp-ta" id="rp-flaw" rows="1" placeholder="What gets him into trouble?"></textarea></div>
-      <div><div class="hp-lbl">Session Notes</div>
-        <textarea class="rp-ta" id="rp-notes" rows="3" placeholder="Goals, DM hooks, plot threads…"></textarea></div>
+
+    <!-- SPARKS -->
+    <div id="rpt-sparks" style="padding:10px 0">
+      <div class="spark-display" id="sparkDisplay" onclick="nextSpark()">
+        <div class="spark-category" id="sparkCat">SITUATION SPARK</div>
+        <div class="spark-text" id="sparkText">Click to generate a spark…</div>
+        <div class="spark-sub" id="sparkSub"></div>
+        <div class="spark-hint">tap for next ▶</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn bblue" style="flex:1;font-size:.75rem" onclick="nextSpark()">⚡ New Spark</button>
+        <button class="btn bgray" style="font-size:.75rem" onclick="stateSpark()">📍 From Current State</button>
+      </div>
     </div>
+
+    <!-- VOICE LINES -->
+    <div id="rpt-voice" style="padding:10px 0;display:none">
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Click a line to highlight it. Sergio is controlled, precise, never loud.</div>
+      <div class="voice-cat">⚔ Battle Start</div>
+      <div class="voice-lines">
+        <div class="vline" onclick="pickLine(this)">"Stay sharp. Watch their hands, not their eyes."</div>
+        <div class="vline" onclick="pickLine(this)">"I've done worse for less. Let's get this done."</div>
+        <div class="vline" onclick="pickLine(this)">"No noise. No hesitation. End it."</div>
+      </div>
+      <div class="voice-cat">🩸 Taking Serious Damage</div>
+      <div class="voice-lines">
+        <div class="vline" onclick="pickLine(this)">"I've paid worse debts than this."</div>
+        <div class="vline" onclick="pickLine(this)">"… keep moving." <span style="color:var(--muted);font-size:.7rem">(through gritted teeth)</span></div>
+        <div class="vline" onclick="pickLine(this)">"You'll need to do better than that."</div>
+      </div>
+      <div class="voice-cat">💀 Landing a Kill / Finishing Blow</div>
+      <div class="voice-lines">
+        <div class="vline" onclick="pickLine(this)">"Sloppy." <span style="color:var(--muted);font-size:.7rem">(said quietly, almost to himself)</span></div>
+        <div class="vline" onclick="pickLine(this)">"Nothing personal." <span style="color:var(--muted);font-size:.7rem">(a beat, then moving on)</span></div>
+        <div class="vline" onclick="pickLine(this)">"Remember this." <span style="color:var(--muted);font-size:.7rem">(to the room, not the corpse)</span></div>
+      </div>
+      <div class="voice-cat">🛡 Helping / Protecting an Ally</div>
+      <div class="voice-lines">
+        <div class="vline" onclick="pickLine(this)">"I've got you. Move."</div>
+        <div class="vline" onclick="pickLine(this)">"You owe me a drink after this."</div>
+        <div class="vline" onclick="pickLine(this)">"Don't make me regret that."</div>
+      </div>
+      <div class="voice-cat">✅ After Victory</div>
+      <div class="voice-lines">
+        <div class="vline" onclick="pickLine(this)">"Don't celebrate yet. Check the exits."</div>
+        <div class="vline" onclick="pickLine(this)">"We got lucky. Don't let it go to your head."</div>
+        <div class="vline" onclick="pickLine(this)">"Clean it up. We were never here."</div>
+      </div>
+    </div>
+
+    <!-- TENSION HOOKS -->
+    <div id="rpt-tension" style="padding:10px 0;display:none">
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:10px">Lawful Good + Criminal past = interesting friction. Click a hook to surface it at the right moment.</div>
+      <div class="tension-item" onclick="this.classList.toggle('picked')" style="border-color:var(--gold)">
+        <div class="tension-q">"The enemy soldier is clearly just following orders — young, scared, clearly not the one in charge. Do you go for the kill or offer terms?"</div>
+        <div class="tension-tag">LAWFUL GOOD vs EFFICIENCY</div>
+      </div>
+      <div class="tension-item" onclick="this.classList.toggle('picked')">
+        <div class="tension-q">"Someone recognizes Sergio from his criminal days. They look nervous. Are they going to be a problem — or do you owe them?"</div>
+        <div class="tension-tag">CRIMINAL PAST</div>
+      </div>
+      <div class="tension-item" onclick="this.classList.toggle('picked')">
+        <div class="tension-q">"Letting the enemy run is the right thing to do — but they'll warn the others. Sergio knows how fleeing targets work."</div>
+        <div class="tension-tag">THE PROFESSIONAL</div>
+      </div>
+      <div class="tension-item" onclick="this.classList.toggle('picked')">
+        <div class="tension-q">"An ally is about to do something tactically smart but morally questionable. Does Sergio stop them, help them, or pretend not to see?"</div>
+        <div class="tension-tag">COMPLICITY</div>
+      </div>
+      <div class="tension-item" onclick="this.classList.toggle('picked')">
+        <div class="tension-q">"The target has information that would help the party — but extracting it would cross a line. How does the man who used to cross lines all the time justify the boundary now?"</div>
+        <div class="tension-tag">WHERE'S THE LINE</div>
+      </div>
+      <div class="tension-item" onclick="this.classList.toggle('picked')">
+        <div class="tension-q">"Sergio wins this fight cleanly. A bystander looks at him with something between fear and awe. Does that bother him — or does he still want that?"</div>
+        <div class="tension-tag">REPUTATION</div>
+      </div>
+    </div>
+
+    <!-- NPCS -->
     <div id="rpt-npcs" style="padding:10px 0;display:none">
       <div id="npcList"></div>
       <button class="btn bblue" style="width:100%;margin-top:7px;font-size:.75rem" onclick="addNPC()">+ Add NPC</button>
@@ -1072,7 +1158,7 @@ footer{text-align:center;padding:12px;color:#1e2d50;font-size:.68rem;border-top:
 
 </div><!-- end right -->
 </div><!-- end layout -->
-<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.7.0</span></footer>
+<footer>SERGIO DE LA TORRE · FIGHTER 11 · BATTLE MASTER · findlerman09 · Auto-saves every 5s &nbsp;·&nbsp; <span style="color:#2a3a5a">v1.8.0</span></footer>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -1459,9 +1545,62 @@ function renderNPCs(){
   });
 }
 function showRpTab(tab){
-  document.getElementById('rpt-character').style.display=tab==='character'?'block':'none';
-  document.getElementById('rpt-npcs').style.display=tab==='npcs'?'block':'none';
-  document.querySelectorAll('#rp-tabs .tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='character'?0:1)));
+  ['sparks','voice','tension','npcs'].forEach((t,i)=>{
+    const el=document.getElementById('rpt-'+t);if(el)el.style.display=t===tab?'block':'none';
+    document.querySelectorAll('#rp-tabs .tab')[i]?.classList.toggle('active',t===tab);
+  });
+}
+function pickLine(el){document.querySelectorAll('.vline.picked').forEach(v=>v.classList.remove('picked'));el.classList.add('picked');}
+
+// ═══ SPARK ENGINE ═══
+const SPARKS={
+  combat:[
+    {cat:'COMBAT MOMENT',text:'You disarm an enemy — their weapon clatters to the floor between you. Do you offer them a second chance to stand down, or press the advantage while you have it?',sub:'Lawful Good doesn\'t mean naive. But Sergio was a criminal — he knows when someone\'s beaten.'},
+    {cat:'COMBAT MOMENT',text:'You\'re winning decisively. The remaining enemy is clearly terrified. What does winning look like for Sergio — a clean end, a warning, a lesson?',sub:'How Sergio finishes fights says more about who he is than how he starts them.'},
+    {cat:'COMBAT MOMENT',text:'An ally charges recklessly into danger. Do you curse under your breath, bail them out efficiently, or let the situation teach them something?',sub:'Sergio has seen what happens to people who don\'t learn.'},
+    {cat:'COMBAT MOMENT',text:'You land your hardest hit of the fight. In that moment — is Sergio in control, or does something older surface briefly?',sub:'The criminal and the lawful man share the same hands.'},
+    {cat:'COMBAT MOMENT',text:'The fight goes longer than expected. Resources are thinning. What does Sergio tell himself to stay focused?',sub:'Battle Masters think. What is Sergio\'s internal voice under pressure?'},
+  ],
+  social:[
+    {cat:'SOCIAL SPARK',text:'Someone asks how Sergio learned to fight like that. The real answer is complicated. What does he say?',sub:'The gap between the criminal past and the lawful present is a story — or a lie of omission.'},
+    {cat:'SOCIAL SPARK',text:'A merchant recognizes Sergio\'s name — not from good things. The party is watching. How does Sergio handle it?',sub:'His reputation from the old days isn\'t gone. It\'s just dormant.'},
+    {cat:'SOCIAL SPARK',text:'Someone thanks Sergio with genuine warmth. Not fear, not professional respect — actual gratitude. Is he comfortable with that?',sub:'A criminal who became good might still feel like an imposter at the hero\'s table.'},
+    {cat:'SOCIAL SPARK',text:'The party is celebrating a win. Sergio is in the room. Is he celebrating — or watching the exits?',sub:'Old habits. Being the guy who\'s always ready is its own kind of loneliness.'},
+    {cat:'SOCIAL SPARK',text:'An NPC tries to bribe Sergio. It\'s a decent amount. What happens in the half-second before he answers?',sub:'The pause matters. Does it cost him anything to say no?'},
+  ],
+  lowHP:[
+    {cat:'SURVIVAL INSTINCT',text:'Sergio is badly hurt. At this HP, what is the one thought keeping him upright?',sub:'Not a plan — a reason. A face, a debt, a principle. Something that outweighs stopping.'},
+    {cat:'SURVIVAL INSTINCT',text:'The body is failing. The mind is still sharp. What does Sergio notice about the battlefield that no one else does?',sub:'A Battle Master doesn\'t stop reading the room just because they\'re bleeding.'},
+    {cat:'SURVIVAL INSTINCT',text:'Sergio takes another serious hit. In character — what does that look like? Does anything show, or is the mask still on?',sub:'The people who know how to absorb pain learned it somewhere specific.'},
+  ],
+  downtime:[
+    {cat:'BETWEEN ENCOUNTERS',text:'The dust settles. What does Sergio do in the first quiet minute after a hard fight?',sub:'The specific ritual — check wounds, count the room, clean the blade — reveals character.'},
+    {cat:'BETWEEN ENCOUNTERS',text:'Sergio has a free evening. He\'s not drinking. He\'s not sleeping. What is he actually doing?',sub:'The things people do when no one\'s watching are the truest version of them.'},
+    {cat:'BETWEEN ENCOUNTERS',text:'The party asks Sergio for his read on the situation. He has one. Does he share the whole thing, or just the part they need?',sub:'Some people inform. Some people manage. Which is Sergio?'},
+  ],
+};
+let sparkIdx={};
+function allSparks(){return [...SPARKS.combat,...SPARKS.social,...SPARKS.downtime];}
+function nextSpark(){
+  const pool=allSparks();
+  const shown=parseInt(sessionStorage.getItem('sparkI')||'-1');
+  const next=(shown+1)%pool.length;
+  sessionStorage.setItem('sparkI',next);
+  showSpark(pool[next]);
+}
+function stateSpark(){
+  const pct=S.hp/S.maxHp;
+  let pool;
+  if(pct<0.35)pool=SPARKS.lowHP;
+  else if(S.round>1||initCombatants.length>0)pool=SPARKS.combat;
+  else pool=SPARKS.social;
+  showSpark(pool[Math.floor(Math.random()*pool.length)]);
+}
+function showSpark(s){
+  document.getElementById('sparkCat').textContent=s.cat;
+  document.getElementById('sparkText').textContent=s.text;
+  const sub=document.getElementById('sparkSub');
+  sub.innerHTML=s.sub?`<strong>Consider:</strong> ${s.sub}`:'';
 }
 
 // SERGIO SELF-CONDITIONS
@@ -1515,7 +1654,7 @@ function copyLog(){
 function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.style.opacity='0',2600);setTimeout(()=>d.remove(),3100);}
 
 // PERSIST
-function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40),npcs,rpTraits:document.getElementById('rp-traits')?.value,rpIdeal:document.getElementById('rp-ideal')?.value,rpBond:document.getElementById('rp-bond')?.value,rpFlaw:document.getElementById('rp-flaw')?.value,rpNotes:document.getElementById('rp-notes')?.value}));}catch(e){}}
+function saveState(){try{localStorage.setItem('sergio3',JSON.stringify({hp:S.hp,sd:S.sd,sw:S.sw,as:S.as,ind:S.ind,kye:S.kye,hd:S.hd,poisonActive:S.poisonActive,round:S.round,turn:S.turn,pistolA:document.getElementById('pistolA').textContent,dartA:document.getElementById('dartA').textContent,slayA:document.getElementById('slayA').textContent,p3A:document.getElementById('p3A').textContent,bdA:document.getElementById('bdA').textContent,prA:document.getElementById('prA').textContent,log:logE.slice(-40),npcs}));}catch(e){}}
 function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)return;const d=JSON.parse(raw);
   if(d.hp!==undefined){S.hp=d.hp;document.getElementById('curHP').value=d.hp;}
   ['sd','sw','as','ind','kye','hd','poisonActive','round','turn'].forEach(k=>{if(d[k]!==undefined)S[k]=d[k];});
@@ -1523,7 +1662,6 @@ function loadState(){try{const raw=localStorage.getItem('sergio3');if(!raw)retur
   if(d.log){logE=d.log;renderLog();}if(S.poisonActive)updatePoisonUI();
   if(S.as===0){document.getElementById('surgeLabel').textContent='Spent';document.getElementById('sl-surge').classList.add('spent');}
   if(d.npcs){npcs=d.npcs;renderNPCs();}
-  ['rpTraits','rpIdeal','rpBond','rpFlaw','rpNotes'].forEach(k=>{const el=document.getElementById('rp-'+k.slice(2).toLowerCase());if(el&&d[k])el.value=d[k];});
 }catch(e){}}
 
 // ═══ INITIATIVE TRACKER ═══
